@@ -1,0 +1,11 @@
+server:
+  remoteWrite:
+    - url: http://mimir.monitoring.svc.cluster.local:9009/api/v1/push
+alertmanager:
+  enabled: false
+pushgateway:
+  enabled: false
+kubeStateMetrics:
+  enabled: false
+nodeExporter:
+  enabled: false

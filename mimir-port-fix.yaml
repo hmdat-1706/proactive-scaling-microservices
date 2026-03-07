@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimir
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mimir
+  template:
+    metadata:
+      labels:
+        app: mimir
+    spec:
+      containers:
+      - name: mimir
+        image: grafana/mimir:latest
+        args:
+        - "-target=all"
+        - "-config.file=/etc/mimir/mimir.yaml"
+        - "-server.http-listen-port=9009"
+        ports:
+        - containerPort: 9009
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/mimir
+      volumes:
+      - name: config-volume
+        configMap:
+          name: mimir-config
