@@ -1,0 +1,142 @@
+# 1. Scale Frontend
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: frontend-proactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: frontend 
+  minReplicaCount: 1
+  maxReplicaCount: 15 
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
+      metricName: prophet_predicted_rps
+      query: sum(prophet_predicted_rps)
+      threshold: "20"
+  - type: cpu
+    metadata:
+      type: Utilization
+      value: "80"
+
+---
+# 2. Scale Cart Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: cart-proactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: cartservice
+  minReplicaCount: 1
+  maxReplicaCount: 15
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
+      metricName: prophet_predicted_rps
+      query: sum(prophet_predicted_rps)
+      threshold: "15" 
+  - type: cpu
+    metadata:
+      type: Utilization
+      value: "80"
+
+---
+# 3. Scale Product Catalog
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: productcatalog-proactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: productcatalogservice
+  minReplicaCount: 1
+  maxReplicaCount: 15
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
+      metricName: prophet_predicted_rps
+      query: sum(prophet_predicted_rps)
+      threshold: "20"
+  - type: cpu
+    metadata:
+      type: Utilization
+      value: "80"
+
+---
+# 4. Scale Recommendation Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: recommendation-proactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: recommendationservice
+  minReplicaCount: 1
+  maxReplicaCount: 15
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
+      metricName: prophet_predicted_rps
+      query: sum(prophet_predicted_rps)
+      threshold: "20"
+  - type: cpu
+    metadata:
+      type: Utilization
+      value: "80"
+
+---
+# 5. Scale Currency Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: currency-proactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: currencyservice
+  minReplicaCount: 1
+  maxReplicaCount: 15
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
+      metricName: prophet_predicted_rps
+      query: sum(prophet_predicted_rps)
+      threshold: "25"
+  - type: cpu
+    metadata:
+      type: Utilization
+      value: "80"
+
+---
+# 6. Scale Ad Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: ad-proactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: adservice
+  minReplicaCount: 1
+  maxReplicaCount: 15
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
+      metricName: prophet_predicted_rps
+      query: sum(prophet_predicted_rps)
+      threshold: "25"
+  - type: cpu
+    metadata:
+      type: Utilization
+      value: "80"
