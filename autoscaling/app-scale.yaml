@@ -1,4 +1,4 @@
-# 1. Scale Frontend
+#Scale Frontend
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
@@ -7,136 +7,107 @@ metadata:
 spec:
   scaleTargetRef:
     name: frontend 
+  pollingInterval: 30
+  cooldownPeriod: 60
   minReplicaCount: 1
-  maxReplicaCount: 15 
+  maxReplicaCount: 10
   triggers:
-  - type: prometheus
+  - type: metrics-api
     metadata:
-      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
-      metricName: prophet_predicted_rps
-      query: sum(prophet_predicted_rps)
-      threshold: "20"
+      url: "http://ai-server-service.boutique.svc.cluster.local:8000/api/forecast"
+      valueLocation: "predicted_rps"
+      targetValue: "65"
   - type: cpu
+    metricType: Utilization
     metadata:
-      type: Utilization
       value: "80"
-
 ---
-# 2. Scale Cart Service
+#Scale Cart Service
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: cart-proactive-scaler
+  name: cart-reactive-scaler
   namespace: boutique
 spec:
   scaleTargetRef:
     name: cartservice
+  cooldownPeriod: 180
   minReplicaCount: 1
-  maxReplicaCount: 15
+  maxReplicaCount: 5
   triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
-      metricName: prophet_predicted_rps
-      query: sum(prophet_predicted_rps)
-      threshold: "15" 
   - type: cpu
+    metricType: Utilization
     metadata:
-      type: Utilization
       value: "80"
-
 ---
-# 3. Scale Product Catalog
+#Scale Product Catalog
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: productcatalog-proactive-scaler
+  name: productcatalog-reactive-scaler
   namespace: boutique
 spec:
   scaleTargetRef:
     name: productcatalogservice
+  cooldownPeriod: 180
   minReplicaCount: 1
-  maxReplicaCount: 15
+  maxReplicaCount: 8
   triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
-      metricName: prophet_predicted_rps
-      query: sum(prophet_predicted_rps)
-      threshold: "20"
   - type: cpu
+    metricType: Utilization
     metadata:
-      type: Utilization
       value: "80"
-
 ---
-# 4. Scale Recommendation Service
+#Scale Recommendation Service
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: recommendation-proactive-scaler
+  name: recommendation-reactive-scaler
   namespace: boutique
 spec:
   scaleTargetRef:
     name: recommendationservice
+  cooldownPeriod: 180
   minReplicaCount: 1
-  maxReplicaCount: 15
+  maxReplicaCount: 5
   triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
-      metricName: prophet_predicted_rps
-      query: sum(prophet_predicted_rps)
-      threshold: "20"
   - type: cpu
+    metricType: Utilization
     metadata:
-      type: Utilization
       value: "80"
-
 ---
-# 5. Scale Currency Service
+#Scale Currency Service
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: currency-proactive-scaler
+  name: currency-reactive-scaler
   namespace: boutique
 spec:
   scaleTargetRef:
     name: currencyservice
+  cooldownPeriod: 180
   minReplicaCount: 1
-  maxReplicaCount: 15
+  maxReplicaCount: 5
   triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
-      metricName: prophet_predicted_rps
-      query: sum(prophet_predicted_rps)
-      threshold: "25"
   - type: cpu
+    metricType: Utilization
     metadata:
-      type: Utilization
       value: "80"
-
 ---
-# 6. Scale Ad Service
+#Scale Ad Service
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: ad-proactive-scaler
+  name: ad-reactive-scaler
   namespace: boutique
 spec:
   scaleTargetRef:
     name: adservice
+  cooldownPeriod: 180
   minReplicaCount: 1
-  maxReplicaCount: 15
+  maxReplicaCount: 5
   triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://prometheus-server.monitoring.svc.cluster.local:80
-      metricName: prophet_predicted_rps
-      query: sum(prophet_predicted_rps)
-      threshold: "25"
   - type: cpu
+    metricType: Utilization
     metadata:
-      type: Utilization
       value: "80"

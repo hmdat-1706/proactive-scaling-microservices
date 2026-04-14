@@ -1,49 +1,39 @@
-# 1. TẠO Ổ CỨNG CHUNG (Để Thợ rèn và Lính gác giao tiếp)
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ai-model-pvc
-  namespace: boutique
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 100Mi # Chỉ cần 100MB là quá dư xài cho file JSON
-
----
-# 2. THỢ RÈN (AI Trainer - Chạy định kỳ)
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: ai-trainer-cronjob
   namespace: boutique
 spec:
-  schedule: "*/5 * * * *" # TRICK: Cho chạy mỗi 5 phút để bảo vệ ĐACN cho lẹ, thực tế là "0 * * * *" (mỗi 1 giờ)
+  schedule: "0 2 * * * "
+  suspend: true
   jobTemplate:
     spec:
       template:
         spec:
           containers:
           - name: ai-trainer
-            image: hmdat-1706/proactive-scaler:v7
-            imagePullPolicy: IfNotPresent # Cực kỳ quan trọng: Lấy Image ở Local chứ không tải từ mạng
+            image: hmdat1706/ai-prophet:v5
+            imagePullPolicy: Always
             command: ["python", "ai_trainer.py"]
+            env:
+            - name: TZ
+              value: "Asia/Ho_Chi_Minh"
+            - name: MLFLOW_TRACKING_URI
+              value: "http://mlflow-service:5000"
             volumeMounts:
-            - name: model-storage
-              mountPath: /shared-data
+            - name: shared-mlflow-storage
+              mountPath: /mlflow/artifacts
           restartPolicy: OnFailure
           volumes:
-          - name: model-storage
-            persistentVolumeClaim:
-              claimName: ai-model-pvc
-
+          - name: shared-mlflow-storage
+            hostPath:
+              path: /tmp/mlflow-artifacts
+              type: DirectoryOrCreate
 ---
-# 3. LÍNH GÁC (AI Server - Trạm phát sóng 24/7)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ai-server-deployment
+  name: ai-server
   namespace: boutique
 spec:
   replicas: 1
@@ -57,21 +47,25 @@ spec:
     spec:
       containers:
       - name: ai-server
-        image: hmdat-1706/proactive-scaler:v7
-        imagePullPolicy: IfNotPresent
-        command: ["python", "ai_server.py"]
+        image: hmdat1706/ai-prophet:v5
+        imagePullPolicy: Always
+        command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
         ports:
         - containerPort: 8000
+        env:
+        - name: TZ
+          value: "Asia/Ho_Chi_Minh"
+        - name: MLFLOW_TRACKING_URI
+          value: "http://mlflow-service:5000"
         volumeMounts:
-        - name: model-storage
-          mountPath: /shared-data
+        - name: shared-mlflow-storage
+          mountPath: /mlflow/artifacts
       volumes:
-      - name: model-storage
-        persistentVolumeClaim:
-          claimName: ai-model-pvc
-
+      - name: shared-mlflow-storage
+        hostPath:
+          path: /tmp/mlflow-artifacts
+          type: DirectoryOrCreate
 ---
-# 4. ĐỊA CHỈ MẠNG (Service - Để KEDA biết đường tìm đến)
 apiVersion: v1
 kind: Service
 metadata:
@@ -81,6 +75,6 @@ spec:
   ports:
   - port: 8000
     targetPort: 8000
-    name: metrics
+    name: http-api
   selector:
     app: ai-server

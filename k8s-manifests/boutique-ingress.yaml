@@ -4,9 +4,10 @@ metadata:
   name: boutique-ingress
   namespace: boutique
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   rules:
-  - http:
+  - host: web.local
+    http:
       paths:
       - path: /
         pathType: Prefix
@@ -15,3 +16,25 @@ spec:
             name: frontend
             port:
               number: 80
+
+  - host: api.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ai-server-service
+            port:
+              number: 8000
+  
+  - host: mlflow.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mlflow-service
+            port:
+              number: 5000

@@ -1,65 +1,56 @@
 import pandas as pd
-import requests
-import json
-from datetime import datetime, timezone, timedelta
 from prophet import Prophet
-from prophet.serialize import model_to_json
+import mlflow
+import mlflow.prophet
 import os
-import warnings
+import requests
+from datetime import datetime
 
-warnings.filterwarnings('ignore')
+MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query")
 
-# 1. Cấu hình
-MIMIR_URL = "http://mimir.monitoring.svc.cluster.local:9009/prometheus/api/v1/query_range"
-# Đường dẫn ổ cứng chung (PVC) trong Pod
-SHARED_DIR = "/shared-data"
-MODEL_PATH = f"{SHARED_DIR}/prophet_model.json"
-
-def fetch_and_train():
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 🛠️ BẮT ĐẦU QUÁ TRÌNH HUẤN LUYỆN...")
+def fetch_metrics_and_append(data_path):
+    print("Fetching latest RPS from Prometheus...")
+    query = 'sum(rate(http_requests_total[1m]))'
     try:
-        # Đảm bảo thư mục dùng chung tồn tại
-        os.makedirs(SHARED_DIR, exist_ok=True)
-
-        # 1. Kéo dữ liệu 1 giờ qua
-        end_time = datetime.now(timezone.utc)
-        start_time = end_time - timedelta(minutes=60)
-        
-        params = {
-            "query": "sum(nginx_ingress_controller_nginx_process_requests_total)",
-            "start": start_time.timestamp(),
-            "end": end_time.timestamp(),
-            "step": "30s"
-        }
-        
-        response = requests.get(MIMIR_URL, params=params)
-        results = response.json()['data']['result'][0]['values']
-        
-        # 2. Xử lý dữ liệu
-        df = pd.DataFrame(results, columns=['timestamp', 'total_requests'])
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s') + timedelta(hours=7)
-        df['total_requests'] = df['total_requests'].astype(float)
-        df['rps'] = df['total_requests'].diff() / 30.0
-        df['rps'] = df['rps'].fillna(0).clip(lower=0)
-        
-        start_t = df['timestamp'].min()
-        df['ds'] = start_t + (df['timestamp'] - start_t) * 30 
-        df['y'] = df['rps']
-        
-        # 3. Huấn luyện mô hình
-        print("🧠 Đang cập nhật kiến thức cho mô hình Prophet...")
-        m = Prophet(daily_seasonality=True, weekly_seasonality=False, yearly_seasonality=False)
-        m.fit(df[['ds', 'y']])
-        
-        # 4. Lưu mô hình (Serialize) ra ổ cứng chung
-        with open(MODEL_PATH, 'w') as fout:
-            json.dump(model_to_json(m), fout)
+        response = requests.get(PROMETHEUS_URL, params={'query': query}, timeout=10)
+        data = response.json()
+        if data.get('status') == 'success' and data['data']['result']:
+            current_rps = float(data['data']['result'][0]['value'][1])
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_row = pd.DataFrame({'ds': [current_time], 'y': [current_rps]})
+            new_row.to_csv(data_path, mode='a', header=False, index=False)
+            print(f"[OK] New data added {data_path}: {current_time} - {current_rps:.2f} RPS")
+        else:
+            print("[WARN] Query successfully but new data not found.")
             
-        print(f"✅ Đã lưu mô hình thành công tại {MODEL_PATH}")
-        print("💤 Thợ rèn AI Trainer xin phép đi ngủ!")
-
     except Exception as e:
-        print(f"❌ Lỗi trong quá trình huấn luyện: {e}")
+        print(f"[ERROR] failed to connect with Prometheus: {e}. Reuse current dataset.")
 
-if __name__ == '__main__':
-    fetch_and_train()
+def train_and_push():
+    data_path = os.getenv("DATASET_PATH", "mock_dataset.csv")
+    fetch_metrics_and_append(data_path)
+
+    if not os.path.exists(data_path):
+        print(f"Dataset not found. {data_path}")
+        return
+
+    print("Reading dataset...")
+    df = pd.read_csv(data_path)
+
+    df['ds'] = pd.to_datetime(df['ds'])
+
+    print("Training Prophet...")
+    m = Prophet(daily_seasonality=20)
+    m.fit(df)
+
+    print(f"Pushing to MLflow ({MLFLOW_URI})...")
+    mlflow.set_tracking_uri(MLFLOW_URI)
+    mlflow.set_experiment("Proactive_Scaling")
+    
+    with mlflow.start_run():
+        mlflow.prophet.log_model(pr_model=m, artifact_path="prophet_model")
+    print("Saving on MLflow successfully.")
+
+if __name__ == "__main__":
+    train_and_push()
