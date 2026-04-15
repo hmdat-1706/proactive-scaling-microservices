@@ -1,14 +1,15 @@
+#Applications
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: proactive-scaling-app
+  name: boutique-microservices
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
     targetRevision: main
-    path: k8s-manifests
+    path: apps/boutique
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: boutique
@@ -18,3 +19,23 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+#Infra
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infrastructure-tools
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
+    targetRevision: main
+    path: infra           # Quản lý toàn bộ thư mục infra (Ingress, Autoscaling...)
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd     # Tool infra thường nằm chung với ArgoCD hoặc kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
