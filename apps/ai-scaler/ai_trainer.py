@@ -25,7 +25,7 @@ def fetch_metrics_and_append(data_path):
             print("[WARN] Query successfully but new data not found.")
             
     except Exception as e:
-        print(f"[ERROR] failed to connect with Prometheus: {e}. Training with current dataset.")
+        print(f"[ERROR] failed to connect with Prometheus: {e}. Keep current dataset.")
 
 def train_and_push():
     data_path = os.getenv("DATASET_PATH", "mock_dataset.csv")
