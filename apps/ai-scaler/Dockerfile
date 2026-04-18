@@ -5,11 +5,12 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ai-scaler/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ai-scaler/ai_trainer.py .
-COPY ai-scaler/ai_server.py .
+COPY ai_trainer.py .
+COPY ai_server.py .
+
 COPY data/mock_dataset.csv . 
 
 EXPOSE 8000
