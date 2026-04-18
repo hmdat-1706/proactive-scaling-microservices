@@ -1,0 +1,41 @@
+name: CI for AI Prophet Scaler
+
+on:
+  push:
+    paths:
+      - 'apps/ai-scaler/**' # Chỉ chạy khi có thay đổi trong thư mục AI
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./apps/ai-scaler
+          push: true
+          # Tự động tạo tag theo mã commit ngắn
+          tags: hmdat1706/ai-prophet:${{ github.sha }}
+
+      - name: Update Manifest Tag (GitOps)
+        run: |
+          # Dùng sed để sửa tag trong file deployment
+          sed -i "s|image: hmdat1706/ai-prophet:.*|image: hmdat1706/ai-prophet:${{ github.sha }}|g" apps/ai-scaler/ai-scaler-architecture.yaml
+          
+          # Commit sự thay đổi này lên chính Repo để ArgoCD nhận diện
+          git config --global user.name "github-actions"
+          git config --global user.email "action@github.com"
+          git add apps/ai-scaler/ai-scaler-architecture.yaml
+          git commit -m "chore: update ai-prophet image tag to ${{ github.sha }}"
+          git push
