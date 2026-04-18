@@ -50,7 +50,7 @@ def train_and_push():
     
     with mlflow.start_run():
         mlflow.prophet.log_model(pr_model=m, artifact_path="prophet_model")
-    print("Saving on MLflow successfully.")
+    print("Saved on MLflow successfully.")
 
 if __name__ == "__main__":
     train_and_push()
