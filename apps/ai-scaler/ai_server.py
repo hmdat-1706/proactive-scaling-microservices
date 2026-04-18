@@ -8,6 +8,7 @@ import os
 app = FastAPI()
 MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow-service.mlops.svc.cluster.local:5000")
 mlflow.set_tracking_uri(MLFLOW_URI)
+PREDICT_MINUTES = int(os.getenv("PREDICT_MINUTES", 15))
 
 client = MlflowClient()
 experiment = client.get_experiment_by_name("Proactive_Scaling")
@@ -20,7 +21,7 @@ model = mlflow.prophet.load_model(MODEL_URI)
 
 @app.get("/api/forecast")
 def get_forecast():
-    target_time = pd.Timestamp.now() + pd.Timedelta(minutes=15)
+    target_time = pd.Timestamp.now() + pd.Timedelta(minutes=PREDICT_MINUTES)
     future = pd.DataFrame({'ds': [target_time]})
     forecast = model.predict(future)
     res = round(float(forecast['yhat'].iloc[-1]), 2)
