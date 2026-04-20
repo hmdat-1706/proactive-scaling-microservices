@@ -5,13 +5,17 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: 'https://prometheus-community.github.io/helm-charts'
-    chart: kube-prometheus-stack
-    targetRevision: 45.x.x
-    helm:
-      valueFiles:
-        - $values/infra/monitoring/values.yaml
+  sources:
+    - repoURL: 'https://prometheus-community.github.io/helm-charts'
+      chart: kube-prometheus-stack
+      targetRevision: 45.7.1
+      helm:
+        valueFiles:
+          - $values/infra/monitoring/values.yaml
+    - repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
+      targetRevision: main
+      ref: values # BẮT BUỘC có dòng này: Đặt bí danh cho repo này là 'values'
+
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring

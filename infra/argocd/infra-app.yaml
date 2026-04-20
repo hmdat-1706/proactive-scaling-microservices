@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
     targetRevision: main
-    path: infra
+    path: infra/argocd
     directory:
       recurse: true
   destination:
