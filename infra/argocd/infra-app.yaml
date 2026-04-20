@@ -9,6 +9,8 @@ spec:
     repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
     targetRevision: main
     path: infra
+    directory:
+      recurse: true
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: argocd

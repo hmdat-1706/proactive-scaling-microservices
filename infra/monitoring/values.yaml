@@ -1,0 +1,24 @@
+# GRAFANA
+grafana:
+  adminPassword: "23520249"
+  defaultDashboardsTimezone: "Asia/Ho_Chi_Minh"
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.local 
+
+# PROMETHEUS
+prometheus:
+  prometheusSpec:
+    scrapeInterval: "15s" 
+    evaluationInterval: "15s"
+    retention: "5d"
+    
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false

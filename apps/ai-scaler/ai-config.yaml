@@ -7,5 +7,6 @@ data:
   TZ: "Asia/Ho_Chi_Minh"
   MLFLOW_TRACKING_URI: "http://mlflow-service:5000"
   PROMETHEUS_URL: "http://prometheus-server.monitoring.svc.cluster.local:9090"
-  DATASET_PATH: "mock_dataset.csv"
+  DATASET_PATH: "mock_dataset.csv" 
   PREDICT_MINUTES: "15"
+  DATA_INTERVAL: "5"
