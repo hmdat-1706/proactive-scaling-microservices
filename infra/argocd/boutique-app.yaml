@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: boutique-microservices
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
+    targetRevision: main
+    path: apps/boutique
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: boutique
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
