@@ -14,7 +14,7 @@ spec:
           - $values/infra/monitoring/values.yaml
     - repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
       targetRevision: main
-      ref: values # BẮT BUỘC có dòng này: Đặt bí danh cho repo này là 'values'
+      ref: values
 
   destination:
     server: 'https://kubernetes.default.svc'
@@ -25,3 +25,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
