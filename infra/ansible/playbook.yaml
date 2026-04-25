@@ -1,0 +1,56 @@
+---
+- name: Bước 1 - Cài đặt gói cơ bản
+  hosts: all
+  become: yes
+  tasks:
+    - name: Cài đặt curl
+      apt:
+        name: curl
+        update_cache: yes
+        state: present
+
+- name: Bước 2 - Dựng Master Node (8GB)
+  hosts: master
+  become: yes
+  tasks:
+    - name: Cài đặt K3s Control Plane
+      shell: curl -sfL https://get.k3s.io | sh -
+      args:
+        creates: /etc/rancher/k3s/k3s.yaml
+
+    - name: Chờ K3s khởi tạo xong
+      wait_for:
+        path: /var/lib/rancher/k3s/server/node-token
+        timeout: 60
+
+    - name: Đọc K3s Token
+      command: cat /var/lib/rancher/k3s/server/node-token
+      register: k3s_token_raw
+
+    - name: Lưu Token cho Worker dùng
+      add_host:
+        name: "K3S_INFO"
+        token: "{{ k3s_token_raw.stdout }}"
+        master_ip: "{{ ansible_host }}"
+
+- name: Bước 3 - Dựng Worker Node (2GB) & Join Cụm
+  hosts: worker
+  become: yes
+  tasks:
+    - name: Cài đặt Agent và Join vào Master
+      shell: >
+        curl -sfL https://get.k3s.io | 
+        K3S_URL=https://{{ hostvars['K3S_INFO']['master_ip'] }}:6443 
+        K3S_TOKEN={{ hostvars['K3S_INFO']['token'] }} sh -
+      args:
+        creates: /etc/rancher/k3s/k3s-agent.env
+
+- name: Bước 4 - Mồi lửa ArgoCD
+  hosts: master
+  become: yes
+  tasks:
+    - name: Tạo Namespace cho ArgoCD
+      shell: k3s kubectl create namespace argocd --dry-run=client -o yaml | k3s kubectl apply -f -
+
+    - name: Cài đặt ArgoCD Core
+      command: k3s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
