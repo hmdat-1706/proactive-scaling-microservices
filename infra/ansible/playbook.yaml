@@ -37,11 +37,17 @@
   hosts: worker
   become: yes
   tasks:
-    - name: Cài đặt Agent và Join vào Master
-      shell: >
-        curl -sfL https://get.k3s.io | 
-        K3S_URL=https://{{ hostvars['K3S_INFO']['master_ip'] }}:6443 
-        K3S_TOKEN={{ hostvars['K3S_INFO']['token'] }} sh -
+    - name: Tải script cài đặt K3s về Worker
+      get_url:
+        url: https://get.k3s.io
+        dest: /tmp/install-k3s.sh
+        mode: '0755'
+
+    - name: Cài đặt Agent và Join vào Master (Cứ để nó chạy, đừng bấm Ctrl+C nhé!)
+      command: /tmp/install-k3s.sh
+      environment:
+        K3S_URL: "https://{{ hostvars['K3S_INFO']['master_ip'] }}:6443"
+        K3S_TOKEN: "{{ hostvars['K3S_INFO']['token'] }}"
       args:
         creates: /etc/rancher/k3s/k3s-agent.env
 
@@ -53,4 +59,13 @@
       shell: k3s kubectl create namespace argocd --dry-run=client -o yaml | k3s kubectl apply -f -
 
     - name: Cài đặt ArgoCD Core
-      command: k3s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+      command: k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml 
+      # 1. Copy file argocd-app.yaml từ Trạm Chỉ Huy sang máy Master ảo
+    - name: Copy file ArgoCD App-of-Apps sang Master
+      copy:
+        src: ../argocd/argocd-app.yaml  # Sửa lại đường dẫn này cho đúng với vị trí file trên Trạm Chỉ Huy của ông
+        dest: /tmp/argocd-app.yaml
+
+    # 2. Dùng K3s apply file đó
+    - name: Kích hoạt mồi lửa ArgoCD (The Magic Touch)
+      command: k3s kubectl apply -f /tmp/argocd-app.yaml
