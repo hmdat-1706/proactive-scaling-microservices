@@ -1,49 +1,70 @@
 ---
-- name: Bước 1 - Cài đặt gói cơ bản
+- name: Step 1 - Install Base Packages  # Bước 1 - Cài đặt các system packages cơ bản
   hosts: all
   become: yes
   tasks:
-    - name: Cài đặt curl
+    - name: Install curl
       apt:
         name: curl
         update_cache: yes
         state: present
 
-- name: Bước 2 - Dựng Master Node (8GB)
+- name: Step 2 - Provision Master Node (8GB)  # Bước 2 - Khởi tạo Master Node (Control Plane)
   hosts: master
   become: yes
   tasks:
-    - name: Cài đặt K3s Control Plane
+    - name: Install K3s Control Plane
       shell: curl -sfL https://get.k3s.io | sh -
       args:
         creates: /etc/rancher/k3s/k3s.yaml
 
-    - name: Chờ K3s khởi tạo xong
+    - name: Wait for K3s initialization  # Chờ K3s khởi động
       wait_for:
         path: /var/lib/rancher/k3s/server/node-token
         timeout: 60
 
-    - name: Đọc K3s Token
+    - name: Read K3s Node Token  # Lay token xác thực của cụm
       command: cat /var/lib/rancher/k3s/server/node-token
       register: k3s_token_raw
 
-    - name: Lưu Token cho Worker dùng
+    - name: Store Token for Worker nodes  # Lưu token vào Ansible facts để cấp quyền join cụm cho Worker
       add_host:
         name: "K3S_INFO"
         token: "{{ k3s_token_raw.stdout }}"
         master_ip: "{{ ansible_host }}"
+        
+    - name: Install kubeseal CLI on Master  # Cài đặt kubeseal CLI phục vụ việc mã hóa Secrets
+      shell: |
+        curl -sL https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.26.2/kubeseal-0.26.2-linux-amd64.tar.gz | tar -xz kubeseal
+        install -m 755 kubeseal /usr/local/bin/kubeseal
+      args:
+        creates: /usr/local/bin/kubeseal
 
-- name: Bước 3 - Dựng Worker Node (2GB) & Join Cụm
+    - name: Fetch Public Cert from new K3s cluster  # Lấy Public Certificate từ Sealed Secrets Controller
+      shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets > /tmp/pub-cert.pem
+
+    - name: Create and Encrypt Password to Sealed Secret  # Khởi tạo Secret và mã hóa thành SealedSecret
+      shell: |
+        sudo k3s kubectl create secret generic redis-password --namespace boutique --from-literal=redis-password="23520249" --dry-run=client -o yaml | \
+        sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/redis-sealed.yaml
+
+    - name: Fetch encrypted file back to Control VM  # Tự động hóa việc đồng bộ file YAML đã mã hóa về Control Node để push lên Git
+      fetch:
+        src: /tmp/redis-sealed.yaml
+        dest: ~/proactive-scaling-microservices/infra/security/redis-sealed.yaml
+        flat: yes
+
+- name: Step 3 - Provision Worker Node (2GB) & Join Cluster  # Bước 3 - Khởi tạo Worker Node và thiết lập kết nối vào Cluster
   hosts: worker
   become: yes
   tasks:
-    - name: Tải script cài đặt K3s về Worker
+    - name: Download K3s install script to Worker  # Tải trước script cài đặt K3s (Tối ưu hóa pipeline, tránh timeout)
       get_url:
         url: https://get.k3s.io
         dest: /tmp/install-k3s.sh
         mode: '0755'
 
-    - name: Cài đặt Agent và Join vào Master (Cứ để nó chạy, đừng bấm Ctrl+C nhé!)
+    - name: Install K3s Agent and Join Master  # Thực thi script Agent và cấu hình thông số kết nối (K3S_URL)
       command: /tmp/install-k3s.sh
       environment:
         K3S_URL: "https://{{ hostvars['K3S_INFO']['master_ip'] }}:6443"
@@ -51,21 +72,20 @@
       args:
         creates: /etc/rancher/k3s/k3s-agent.env
 
-- name: Bước 4 - Mồi lửa ArgoCD
+- name: Step 4 - Bootstrap ArgoCD  # Bước 4 - Triển khai ArgoCD (GitOps Controller)
   hosts: master
   become: yes
   tasks:
-    - name: Tạo Namespace cho ArgoCD
+    - name: Create ArgoCD Namespace
       shell: k3s kubectl create namespace argocd --dry-run=client -o yaml | k3s kubectl apply -f -
 
-    - name: Cài đặt ArgoCD Core
+    - name: Install ArgoCD Core  # Sử dụng Server-Side Apply để vượt qua giới hạn kích thước 256KB annotation của CRDs
       command: k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml 
-      # 1. Copy file argocd-app.yaml từ Trạm Chỉ Huy sang máy Master ảo
-    - name: Copy file ArgoCD App-of-Apps sang Master
+      
+    - name: Copy ArgoCD App-of-Apps manifest to Master  # Truyền cấu hình App-of-Apps sang Master Node
       copy:
-        src: ../argocd/argocd-app.yaml  # Sửa lại đường dẫn này cho đúng với vị trí file trên Trạm Chỉ Huy của ông
+        src: ../argocd/argocd-app.yaml  
         dest: /tmp/argocd-app.yaml
 
-    # 2. Dùng K3s apply file đó
-    - name: Kích hoạt mồi lửa ArgoCD (The Magic Touch)
+    - name: Apply ArgoCD App-of-Apps (Bootstrap)  # Khởi chạy manifest gốc để kích hoạt tiến trình tự động đồng bộ GitOps
       command: k3s kubectl apply -f /tmp/argocd-app.yaml
