@@ -9,7 +9,7 @@
         update_cache: yes
         state: present
 
-- name: Step 2 - Provision Master Node (8GB)  # Bước 2 - Khởi tạo Master Node (Control Plane)
+- name: Step 2 - Provision Master Node  # Bước 2 - Khởi tạo Master Node (Control Plane)
   hosts: master
   become: yes
   tasks:
@@ -40,7 +40,7 @@
       args:
         creates: /usr/local/bin/kubeseal
 
-- name: Step 3 - Provision Worker Node (2GB) & Join Cluster  # Bước 3 - Khởi tạo Worker Node và thiết lập kết nối vào Cluster
+- name: Step 3 - Provision Worker Node & Join Cluster  # Bước 3 - Khởi tạo Worker Node và thiết lập kết nối vào Cluster
   hosts: worker
   become: yes
   tasks:
@@ -96,5 +96,5 @@
     - name: Retrieve encrypted manifest to Control Node for Git commit  # Kéo file đã mã hóa về máy Control để chuẩn bị đẩy lên VCS
       fetch:
         src: /tmp/redis-sealed.yaml
-        dest: ~/proactive-scaling-microservices/infra/security/redis-sealed.yaml
+        dest: ~/proactive-scaling-microservices/apps/security/redis-sealed.yaml
         flat: yes
