@@ -40,20 +40,6 @@
       args:
         creates: /usr/local/bin/kubeseal
 
-    - name: Fetch Public Cert from new K3s cluster  # Lấy Public Certificate từ Sealed Secrets Controller
-      shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets > /tmp/pub-cert.pem
-
-    - name: Create and Encrypt Password to Sealed Secret  # Khởi tạo Secret và mã hóa thành SealedSecret
-      shell: |
-        sudo k3s kubectl create secret generic redis-password --namespace boutique --from-literal=redis-password="23520249" --dry-run=client -o yaml | \
-        sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/redis-sealed.yaml
-
-    - name: Fetch encrypted file back to Control VM  # Tự động hóa việc đồng bộ file YAML đã mã hóa về Control Node để push lên Git
-      fetch:
-        src: /tmp/redis-sealed.yaml
-        dest: ~/proactive-scaling-microservices/infra/security/redis-sealed.yaml
-        flat: yes
-
 - name: Step 3 - Provision Worker Node (2GB) & Join Cluster  # Bước 3 - Khởi tạo Worker Node và thiết lập kết nối vào Cluster
   hosts: worker
   become: yes
@@ -89,3 +75,26 @@
 
     - name: Apply ArgoCD App-of-Apps (Bootstrap)  # Khởi chạy manifest gốc để kích hoạt tiến trình tự động đồng bộ GitOps
       command: k3s kubectl apply -f /tmp/argocd-app.yaml
+      
+- name: Step 5 - Post-Provisioning (Auto Seal Secret)  # Bước 5 - Tự động hóa mã hóa bảo mật sau khi GitOps đã chạy
+  hosts: master
+  become: yes
+  tasks:
+    - name: Wait for ArgoCD synchronization and Sealed Secrets Controller initialization  # Delay có chủ đích để chờ ArgoCD cài đặt xong các dependencies
+      pause:
+        seconds: 90
+        prompt: "Waiting for ArgoCD to deploy Sealed Secrets Controller..."
+
+    - name: Retrieve Public Certificate from Sealed Secrets Controller  # Trích xuất Public Key từ controller mới được tạo
+      shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
+
+    - name: Generate and encrypt generic secret via Asymmetric Cryptography  # Khởi tạo Secret nguyên bản và mã hóa ngay lập tức bằng thuật toán bất đối xứng
+      shell: |
+        sudo k3s kubectl create secret generic redis-password --namespace boutique --from-literal=redis-password="23520249" --dry-run=client -o yaml | \
+        sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/redis-sealed.yaml
+
+    - name: Retrieve encrypted manifest to Control Node for Git commit  # Kéo file đã mã hóa về máy Control để chuẩn bị đẩy lên VCS
+      fetch:
+        src: /tmp/redis-sealed.yaml
+        dest: ~/proactive-scaling-microservices/infra/security/redis-sealed.yaml
+        flat: yes
