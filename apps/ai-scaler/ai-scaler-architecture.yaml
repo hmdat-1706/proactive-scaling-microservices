@@ -12,7 +12,7 @@ spec:
         spec:
           containers:
           - name: ai-trainer
-            image: hmdat1706/ai-prophet:550dc96dd0ba870aff11f71ff2ced5ed852320e2
+            image: hmdat1706/ai-prophet:c836a8b3334f9ba076b3b3ccd5a78c7c90433168
             imagePullPolicy: Always
             command: ["python", "ai_trainer.py"]
             envFrom:
@@ -45,7 +45,7 @@ spec:
     spec:
       containers:
       - name: ai-server
-        image: hmdat1706/ai-prophet:550dc96dd0ba870aff11f71ff2ced5ed852320e2
+        image: hmdat1706/ai-prophet:c836a8b3334f9ba076b3b3ccd5a78c7c90433168
         imagePullPolicy: Always
         command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
         ports:
