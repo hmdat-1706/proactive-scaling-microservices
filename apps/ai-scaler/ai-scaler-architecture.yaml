@@ -18,6 +18,8 @@ spec:
             envFrom:
               - configMapRef:
                   name: ai-scaler-config
+            nodeSelector:
+              node-role.kubernetes.io/control-plane: "true"
             volumeMounts:
             - name: shared-mlflow-storage
               mountPath: /mlflow/artifacts
@@ -53,6 +55,8 @@ spec:
         envFrom:
           - configMapRef:
               name: ai-scaler-config
+        nodeSelector:
+          node-role.kubernetes.io/control-plane: "true"
         volumeMounts:
         - name: shared-mlflow-storage
           mountPath: /mlflow/artifacts

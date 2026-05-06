@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: proactive-autoscaling-infra
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hmdat-1706/proactive-scaling-microservices.git
+    targetRevision: HEAD
+    path: infra/autoscaling
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: boutique
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
