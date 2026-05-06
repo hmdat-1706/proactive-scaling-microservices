@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: proactive-autoscaling-infra
+  name: keda-hpa
   namespace: argocd
 spec:
   project: default
