@@ -4,8 +4,8 @@ metadata:
   name: ai-trainer-cronjob
   namespace: boutique
 spec:
-  schedule: "0 2 * * * "
-  suspend: true
+  schedule: "0 1 * * 1"   # Chạy 1h sáng Thứ 2
+  suspend: false
   jobTemplate:
     spec:
       template:
@@ -18,17 +18,15 @@ spec:
             envFrom:
               - configMapRef:
                   name: ai-scaler-config
-            nodeSelector:
-              node-role.kubernetes.io/control-plane: "true"
+            # Dùng chung ổ cứng PVC với MLflow
             volumeMounts:
             - name: shared-mlflow-storage
               mountPath: /mlflow/artifacts
           restartPolicy: OnFailure
           volumes:
           - name: shared-mlflow-storage
-            hostPath:
-              path: /tmp/mlflow-artifacts
-              type: DirectoryOrCreate
+            persistentVolumeClaim:
+              claimName: mlflow-storage-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -55,16 +53,6 @@ spec:
         envFrom:
           - configMapRef:
               name: ai-scaler-config
-        nodeSelector:
-          node-role.kubernetes.io/control-plane: "true"
-        volumeMounts:
-        - name: shared-mlflow-storage
-          mountPath: /mlflow/artifacts
-      volumes:
-      - name: shared-mlflow-storage
-        hostPath:
-          path: /tmp/mlflow-artifacts
-          type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
