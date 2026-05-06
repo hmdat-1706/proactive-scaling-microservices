@@ -1,0 +1,15 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: redis-password
+  namespace: boutique
+spec:
+  encryptedData:
+    redis-password: AgCMZ3+sZE24g+G4ZqVYmaDW72VRaP0TBitbdZUmm2AVUMrhLF/e1tJgLEW6JoxdnHY7zE+nzyJwigj3D/vHkr7aGMaNEi9U8+EZ8vMY44KvAFsp/C/woAzLdAQNHRn9QuwKoz+/VQSmAJCh7JgBvV94xIgIEBiPMCLh5TRloj9lpl95AM6tRcpMSKDhp89c1MbgubUESMGJ6jy36sBeFa3iAajb1dufFLCWYpETS17tn3FepTk5ck9btECEc6R6rwisblXeiD9ncPWIVY2VhVzPpIfScs7UDKeup467Zv1xjlUGbpQhvytyHOivxJqRE/tSj3zDC4nkCsdG3cQrH9ITl6zxgfhsGUI537D9v32vcklxesFapbkwHIibUfhGIXgLx6zOaCaCspqagyxJ+NDrmO8hEe98CHDP5ja6bjYUnFXxYMFpQDbMl8QKLiBnBqDazOmkBLhN7fsMc8q8p52aCd/1EXWdbRPo5+Bejz8XP0gGObCnke6JFU8nbRoAbjeOEqm9ln2RJ8gYnOsHtQJZvLIkW14t08TO8L3NfqUULtGFeBKPCwyeJ1GcnwOt5fl4gJ7vDIYTBte2CXS6pBjX6T2HfmhLFaQNRqw29HcrSMsf1b/hAmR8f9mv7CpmI4P4VQwL+ulrE2rMkgTbim/IFXK/3mmvKFIPoO6ju1WCdzyUR+UtwEZG5nX0piXtJSd56rFudiG1tw==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: redis-password
+      namespace: boutique
