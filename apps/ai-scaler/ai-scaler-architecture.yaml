@@ -1,24 +1,26 @@
+---
+# ==========================================================
+# 1. DAILY DATA INGESTION JOB (Runs at 02:00 AM Daily)
+# ==========================================================
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: ai-trainer-cronjob
+  name: data-ingestion-cronjob
   namespace: boutique
 spec:
-  schedule: "0 1 * * 1"   # Chạy 1h sáng Thứ 2
-  suspend: false
+  schedule: "0 2 * * *"
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: ai-trainer
-            image: hmdat1706/ai-prophet:c836a8b3334f9ba076b3b3ccd5a78c7c90433168
+          - name: data-ingestion
+            image: hmdat1706/ai-prophet:latest 
             imagePullPolicy: Always
-            command: ["python", "ai_trainer.py"]
+            command: ["python", "data_ingestion.py"]
             envFrom:
               - configMapRef:
                   name: ai-scaler-config
-            # Dùng chung ổ cứng PVC với MLflow
             volumeMounts:
             - name: shared-mlflow-storage
               mountPath: /mlflow/artifacts
@@ -28,41 +30,33 @@ spec:
             persistentVolumeClaim:
               claimName: mlflow-storage-pvc
 ---
-apiVersion: apps/v1
-kind: Deployment
+# ==========================================================
+# 2. WEEKLY MODEL RETRAINING JOB (Runs at 02:00 AM every Monday)
+# ==========================================================
+apiVersion: batch/v1
+kind: CronJob
 metadata:
-  name: ai-server
+  name: model-retrain-cronjob
   namespace: boutique
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ai-server
-  template:
-    metadata:
-      labels:
-        app: ai-server
+  schedule: "0 2 * * 1"
+  jobTemplate:
     spec:
-      containers:
-      - name: ai-server
-        image: hmdat1706/ai-prophet:c836a8b3334f9ba076b3b3ccd5a78c7c90433168
-        imagePullPolicy: Always
-        command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
-        ports:
-        - containerPort: 8000
-        envFrom:
-          - configMapRef:
-              name: ai-scaler-config
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ai-server-service
-  namespace: boutique
-spec:
-  ports:
-  - port: 8000
-    targetPort: 8000
-    name: http-api
-  selector:
-    app: ai-server
+      template:
+        spec:
+          containers:
+          - name: model-retrain
+            image: hmdat1706/ai-prophet:latest 
+            imagePullPolicy: Always
+            command: ["python", "model_retrain.py"]
+            envFrom:
+              - configMapRef:
+                  name: ai-scaler-config
+            volumeMounts:
+            - name: shared-mlflow-storage
+              mountPath: /mlflow/artifacts
+          restartPolicy: OnFailure
+          volumes:
+          - name: shared-mlflow-storage
+            persistentVolumeClaim:
+              claimName: mlflow-storage-pvc
