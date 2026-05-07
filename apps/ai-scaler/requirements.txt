@@ -1,6 +1,12 @@
 prophet
 pandas
-mlflow==2.11.1
 fastapi
 uvicorn
 setuptools
+
+
+mlflow>=2.22.4
+gunicorn>=22.0.0
+jaraco.context>=6.1.0
+protobuf>=5.29.6
+wheel>=0.46.2
