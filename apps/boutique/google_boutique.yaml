@@ -544,6 +544,12 @@ spec:
             value: "adservice:9555"
           - name: ENABLE_PROFILER
             value: "0"
+          - name: AD_SERVICE_ADDR
+            value: "adservice:9555"
+          - name: RECOMMENDATION_SERVICE_ADDR
+            value: "recommendationservice:8080"
+          - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+            value: "shoppingassistantservice:80"
           resources:
             requests:
               cpu: 100m
