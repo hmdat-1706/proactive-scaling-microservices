@@ -15,7 +15,7 @@ spec:
         spec:
           containers:
           - name: data-ingestion
-            image: hmdat1706/ai-prophet:latest 
+            image: hmdat1706/ai-prophet:401a43859431c4922b51a54abba28b42a48b646c
             imagePullPolicy: Always
             command: ["python", "data_ingestion.py"]
             envFrom:
@@ -46,7 +46,7 @@ spec:
         spec:
           containers:
           - name: model-retrain
-            image: hmdat1706/ai-prophet:latest 
+            image: hmdat1706/ai-prophet:401a43859431c4922b51a54abba28b42a48b646c
             imagePullPolicy: Always
             command: ["python", "model_retrain.py"]
             envFrom:
