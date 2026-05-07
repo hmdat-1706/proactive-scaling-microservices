@@ -58,24 +58,6 @@ spec:
     metadata:
       value: "80"
 ---
-#Scale Recommendation Service
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
-metadata:
-  name: recommendation-reactive-scaler
-  namespace: boutique
-spec:
-  scaleTargetRef:
-    name: recommendationservice
-  cooldownPeriod: 180
-  minReplicaCount: 1
-  maxReplicaCount: 5
-  triggers:
-  - type: cpu
-    metricType: Utilization
-    metadata:
-      value: "80"
----
 #Scale Currency Service
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -94,15 +76,15 @@ spec:
     metadata:
       value: "80"
 ---
-#Scale Ad Service
+# Scale Checkout Service
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: ad-reactive-scaler
+  name: checkout-reactive-scaler
   namespace: boutique
 spec:
   scaleTargetRef:
-    name: adservice
+    name: checkoutservice
   cooldownPeriod: 180
   minReplicaCount: 1
   maxReplicaCount: 5
@@ -111,3 +93,58 @@ spec:
     metricType: Utilization
     metadata:
       value: "80"
+---
+# Scale Shipping Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: shipping-reactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: shippingservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+  - type: cpu
+    metricType: Utilization
+    metadata:
+      value: "80"
+---
+# Scale Payment Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: payment-reactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: paymentservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+  - type: cpu
+    metricType: Utilization
+    metadata:
+      value: "80"
+---
+# Scale Email Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: email-reactive-scaler
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: emailservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+  - type: cpu
+    metricType: Utilization
+    metadata:
+      value: "80"
+---
