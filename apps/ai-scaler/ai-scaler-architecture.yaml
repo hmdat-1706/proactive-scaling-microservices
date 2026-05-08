@@ -13,9 +13,13 @@ spec:
     spec:
       template:
         spec:
+          # Thêm chìa khóa để kéo Image từ GHCR
+          imagePullSecrets:
+            - name: ghcr-secret
           containers:
           - name: data-ingestion
-            image: hmdat1706/ai-prophet:87d3b97be61e90175547309bbab2123621f58544
+            # Đổi sang link GHCR
+            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:latest
             imagePullPolicy: Always
             command: ["python", "data_ingestion.py"]
             envFrom:
@@ -44,9 +48,13 @@ spec:
     spec:
       template:
         spec:
+          # Thêm chìa khóa để kéo Image từ GHCR
+          imagePullSecrets:
+            - name: ghcr-secret
           containers:
           - name: model-retrain
-            image: hmdat1706/ai-prophet:87d3b97be61e90175547309bbab2123621f58544
+            # Đổi sang link GHCR
+            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:latest
             imagePullPolicy: Always
             command: ["python", "model_retrain.py"]
             envFrom:
@@ -60,7 +68,6 @@ spec:
           - name: shared-mlflow-storage
             persistentVolumeClaim:
               claimName: mlflow-storage-pvc
----
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -77,9 +84,11 @@ spec:
       labels:
         app: ai-server
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
       - name: ai-server
-        image: hmdat1706/ai-prophet:87d3b97be61e90175547309bbab2123621f58544
+        image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:latest
         imagePullPolicy: Always
         command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
         ports:
