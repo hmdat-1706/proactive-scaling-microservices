@@ -12,7 +12,7 @@ DATA_INTERVAL = int(os.getenv("DATA_INTERVAL", "5"))
 DATA_DIR = os.path.dirname(DATA_PATH)
 
 def fetch_daily_metrics():
-    print(f"[{datetime.now()}] [INFO] Starting 24h data ingestion from Prometheus...")
+    print(f"[{datetime.now()}] [INFO] Starting data ingestion from Prometheus...")
     os.makedirs(DATA_DIR, exist_ok=True)
 
     # Calculate time range (Last 24h)
