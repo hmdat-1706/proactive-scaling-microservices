@@ -1,0 +1,16 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: ghcr-secret
+  namespace: boutique
+spec:
+  encryptedData:
+    .dockerconfigjson: AgARfgX/R0MLJRzu/+KwzAb3Y7ykh1S/hgatytIKIgec1p1S/yHJh9hZyG5cjEw1fb09LOYYT/Y5AkN6qM5FWSgiWD4aUpiewhNsLu1108j9UkXpe0cmGeKz2jgbxaP6S11J9Yl2sWCeZd3H2O9nCEq6vYqZCX7d8yFdBTtxLBVkPVZx0+rm2/hxPlW/lKSumO0C7KMXn3LZ6GpLvRoHb6suVStLfGPS4GXFQ3UJ3g7LWyKrIwNhWZvl+qb6AWgpBbDz0qpd1YUTqNucsC78XP9BZc5K/aIEyWsf3+Wc0ULso257xNBqrsa6fz4F6nJS54mzQKL/lwsI41Lhc9a+LKkVpTXiGvQIOvAgIpL1C4/qHQIZiNch3K1YEjhjfbBpTa+hRgZaL89yK87yOC5lU672iTWPIKgIuRCCRHblr92IaXNmgjfhcTIkuyAJT6wVy8buThMZ6jiuGA9fKTiXeEEDwiOmGVaxXDD5aPCxiDhRcaF182BMpKsginLkyUwu8AIdt8D24yRclZaKo3JeicllyNh9ds5yT/eH0ak1MhAxipaRPuTQXZxExB2mVkI2zgS2Ksgy8JcrPQE8wNArg0moNwdWsSinW8u5hxm4tUX3g+1VrwuotG2NPgCgqrk/6kLj8Tp47sfXTDR6TpmkJn4ZTdHsblW6IfUrxlSA3L2dHKEE0N2qrThmnGZMHQsKXzacDC7V+ZSoDC38oK4+20/l6lEpTTu0aYjy6Se39nMHEW1JbWNuPjx+xtyQ5OeBCNvNC23Vo2SUsyrv4C5uf79yPiRYZoneA48LDD+cWF0dX0H0gC20RS8gcyH7h21Ba+wMVElZxba291VqNWh5I5ZQrZarldTrrRqu0Vk1QKtP512g/0M9fFp1HZYV2rhGm91b89wri1x5fpGY3Fx9t70hqOhT+qxg1FHkmjKeyQn2CLnnNg==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: ghcr-secret
+      namespace: boutique
+    type: kubernetes.io/dockerconfigjson
