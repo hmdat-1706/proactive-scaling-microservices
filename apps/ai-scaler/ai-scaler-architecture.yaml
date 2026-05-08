@@ -15,7 +15,7 @@ spec:
         spec:
           containers:
           - name: data-ingestion
-            image: hmdat1706/ai-prophet:a27c7ddafd7c3cd3542c46ac97b45a03888be3a6
+            image: hmdat1706/ai-prophet:87d3b97be61e90175547309bbab2123621f58544
             imagePullPolicy: Always
             command: ["python", "data_ingestion.py"]
             envFrom:
@@ -46,7 +46,7 @@ spec:
         spec:
           containers:
           - name: model-retrain
-            image: hmdat1706/ai-prophet:a27c7ddafd7c3cd3542c46ac97b45a03888be3a6
+            image: hmdat1706/ai-prophet:87d3b97be61e90175547309bbab2123621f58544
             imagePullPolicy: Always
             command: ["python", "model_retrain.py"]
             envFrom:
@@ -79,7 +79,7 @@ spec:
     spec:
       containers:
       - name: ai-server
-        image: hmdat1706/ai-prophet:a27c7ddafd7c3cd3542c46ac97b45a03888be3a6
+        image: hmdat1706/ai-prophet:87d3b97be61e90175547309bbab2123621f58544
         imagePullPolicy: Always
         command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
         ports:
