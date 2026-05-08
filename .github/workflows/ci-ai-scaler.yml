@@ -59,15 +59,17 @@ jobs:
 
       - name: Update Manifest Tag (GitOps)
         run: |
-          # Đổi pattern regex để nó bắt đúng cái link GHCR mới
-          # Nếu ông khai báo Deployment ở file ai-config.yaml thì nhớ sửa tên file ở cuối dòng lệnh này nhé
-          sed -i "s|image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:.*|image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ github.sha }}|g" apps/ai-scaler/ai-config.yaml
+          sed -i "s|image: .*ai-prophet:.*|image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ github.sha }}|g" apps/ai-scaler/ai-config.yaml
           
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           git add apps/ai-scaler/ai-config.yaml
           
-          git commit -m "chore(gitops): update ai-prophet image tag to ${{ github.sha }} [skip ci]"
-          
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(gitops): update ai-prophet image tag to ${{ github.sha }} [skip ci]"
+            git push
+            echo "New tag added succesfully."
+          else
+            echo "No change had found, skiped commit step."
+          fi
