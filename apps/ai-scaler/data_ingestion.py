@@ -5,27 +5,27 @@ from datetime import datetime
 import time
 
 # Configurations
-PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://kube-prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query_range")
-# Trỏ vào ổ đĩa PVC được mount vào Pod
-DATA_DIR = "/mlflow/artifacts/data_lake"
-DATA_PATH = os.path.join(DATA_DIR, "test_dataset.csv")
+PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://localhost:9090/api/v1/query_range")
+PROMETHEUS_QUERY = os.getenv("PROMETHEUS_QUERY", "sum(rate(http_requests_total[1m]))")
+DATA_PATH = os.getenv("DATA_PATH", "/mlflow/artifacts/data_lake/test_dataset.csv")
+DATA_INTERVAL = int(os.getenv("DATA_INTERVAL", "5"))
+DATA_DIR = os.path.dirname(DATA_PATH)
 
 def fetch_daily_metrics():
     print(f"[{datetime.now()}] [INFO] Starting 24h data ingestion from Prometheus...")
-    
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    # Calculate time range (Last 24h, 5-minute steps = 300s)
+    # Calculate time range (Last 24h)
     end_time = int(time.time())
     start_time = end_time - (24 * 3600)
-    query = 'sum(rate(http_requests_total[1m]))'
+    step_seconds = DATA_INTERVAL * 60 # Tự động tính step (VD: 5 * 60 = 300s)
 
     try:
         response = requests.get(PROMETHEUS_URL, params={
-            'query': query,
+            'query': PROMETHEUS_QUERY,
             'start': start_time,
             'end': end_time,
-            'step': '300s'
+            'step': f'{step_seconds}s'
         }, timeout=15)
         
         data = response.json()

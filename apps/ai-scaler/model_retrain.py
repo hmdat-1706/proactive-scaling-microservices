@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 
 # Configurations
 MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow-service.boutique.svc.cluster.local:5000")
-DATA_PATH = "/mlflow/artifacts/data_lake/test_dataset.csv"
+DATA_PATH = os.getenv("DATA_PATH", "/mlflow/artifacts/data_lake/test_dataset.csv")
+WINDOW_DAYS = int(os.getenv("RETRAIN_WINDOW_DAYS", "90"))
+DATA_INTERVAL = os.getenv("DATA_INTERVAL", "5")
 
 def retrain_model():
     print(f"[{datetime.now()}] [INFO] Initiating Sliding Window Retraining Pipeline...")
@@ -20,20 +22,19 @@ def retrain_model():
     df = pd.read_csv(DATA_PATH)
     df['ds'] = pd.to_datetime(df['ds'])
 
-    # Extract 30-day sliding window
-    cutoff_date = datetime.now() - timedelta(days=90)
+    # Extract sliding window
+    cutoff_date = datetime.now() - timedelta(days=WINDOW_DAYS)
     df_window = df[df['ds'] >= cutoff_date].copy()
     
-    print(f"[{datetime.now()}] [INFO] Total historical records: {len(df)}. Sliding window (30 days): {len(df_window)} records.")
+    print(f"[{datetime.now()}] [INFO] Total historical records: {len(df)}. Sliding window ({WINDOW_DAYS} days): {len(df_window)} records.")
 
-    # Require at least 1 day of data (288 points) to train
     if len(df_window) < 288: 
         print(f"[{datetime.now()}] [SKIP] Insufficient data points ({len(df_window)}). Minimum 288 required.")
         return
 
     # Data Preprocessing
     df_window.set_index('ds', inplace=True)
-    df_window = df_window.resample('5T').mean().ffill().reset_index()
+    df_window = df_window.resample(f'{DATA_INTERVAL}T').mean().ffill().reset_index()
 
     print(f"[{datetime.now()}] [INFO] Fitting Prophet model...")
     m = Prophet(daily_seasonality=True, weekly_seasonality=True)
@@ -45,7 +46,7 @@ def retrain_model():
     
     with mlflow.start_run() as run:
         mlflow.prophet.log_model(pr_model=m, artifact_path="prophet_model")
-        mlflow.log_param("window_days", 90)
+        mlflow.log_param("window_days", WINDOW_DAYS)
         mlflow.log_param("data_points", len(df_window))
         mlflow.set_tag("status", "staging_frozen") 
         print(f"[{datetime.now()}] [SUCCESS] Model registered successfully. Run ID: {run.info.run_id}")
