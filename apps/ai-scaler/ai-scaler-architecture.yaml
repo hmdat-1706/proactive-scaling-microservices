@@ -13,12 +13,11 @@ spec:
     spec:
       template:
         spec:
-          # Thêm chìa khóa để kéo Image từ GHCR
+          # Thêm token để kéo Image từ GHCR
           imagePullSecrets:
             - name: ghcr-secret
           containers:
           - name: data-ingestion
-            # Đổi sang link GHCR
             image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:latest
             imagePullPolicy: Always
             command: ["python", "data_ingestion.py"]
@@ -48,12 +47,11 @@ spec:
     spec:
       template:
         spec:
-          # Thêm chìa khóa để kéo Image từ GHCR
+          # Thêm token để kéo Image từ GHCR
           imagePullSecrets:
             - name: ghcr-secret
           containers:
           - name: model-retrain
-            # Đổi sang link GHCR
             image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:latest
             imagePullPolicy: Always
             command: ["python", "model_retrain.py"]
