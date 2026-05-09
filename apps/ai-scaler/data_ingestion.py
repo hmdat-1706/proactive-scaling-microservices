@@ -6,7 +6,7 @@ import time
 
 # Configurations
 PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://localhost:9090/api/v1/query_range")
-PROMETHEUS_QUERY = os.getenv("PROMETHEUS_QUERY", "sum(rate(http_requests_total[1m]))")
+PROMETHEUS_QUERY = os.getenv("PROMETHEUS_QUERY", "sum(rate(traefik_service_requests_total[1m]))")
 DATA_PATH = os.getenv("DATA_PATH", "/mlflow/artifacts/data_lake/test_dataset.csv")
 DATA_INTERVAL = int(os.getenv("DATA_INTERVAL", "5"))
 DATA_DIR = os.path.dirname(DATA_PATH)
