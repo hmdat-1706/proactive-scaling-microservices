@@ -1,0 +1,46 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    metrics:
+      prometheus:
+        enabled: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-internal-metrics
+  namespace: kube-system
+  labels:
+    # Gắn nhãn để ServiceMonitor tìm
+    metrics-expose: "true" 
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: traefik 
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: 9100
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: traefik-monitor
+  namespace: kube-system
+  labels:
+    release: monitoring-stack 
+spec:
+  selector:
+    matchLabels:
+      metrics-expose: "true"
+  namespaceSelector:
+    matchNames:
+      - kube-system
+  endpoints:
+    - port: metrics
+      path: /metrics
