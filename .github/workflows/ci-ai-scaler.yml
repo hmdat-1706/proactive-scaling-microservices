@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'apps/ai-scaler/**'
-      - '!apps/ai-scaler/ai-config.yaml' 
+      - '!apps/ai-scaler/ai-configmap.yaml' 
     branches:
       - main
 
