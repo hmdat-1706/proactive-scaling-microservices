@@ -9,10 +9,9 @@ spec:
     metrics:
       prometheus:
         enabled: true
-        addRoutersLabels: true
-        addServicesLabels: true
     ports:
-      traefik:
+      metrics:
+        port: 9100
         expose: true
 ---
 apiVersion: monitoring.coreos.com/v1
@@ -30,5 +29,5 @@ spec:
     matchNames:
       - kube-system
   endpoints:
-    - port: traefik
+    - port: metrics
       path: /metrics
