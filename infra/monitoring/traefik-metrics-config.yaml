@@ -16,7 +16,7 @@ metadata:
   name: traefik-internal-metrics
   namespace: kube-system
   labels:
-    # Gắn nhãn để ServiceMonitor tìm
+    # Gắn nhãn cho ServiceMonitor tìm
     metrics-expose: "true" 
 spec:
   type: ClusterIP
