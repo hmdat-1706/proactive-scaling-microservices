@@ -57,19 +57,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Update Manifest Tag (GitOps)
+      - name: Update Manifest Tag
         run: |
-          sed -i "s|image: .*ai-prophet:.*|image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ github.sha }}|g" apps/ai-scaler/ai-config.yaml
+          sed -i "s|image: .*ai-prophet:.*|image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ github.sha }}|g" apps/ai-scaler/ai-scaler-architecture.yaml
           
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add apps/ai-scaler/ai-config.yaml
+          git add apps/ai-scaler/ai-scaler-architecture.yaml
           
           if ! git diff --cached --quiet; then
-            git commit -m "chore(gitops): update ai-prophet image tag to ${{ github.sha }} [skip ci]"
+            git commit -m "chore(gitops): update image tag to ${{ github.sha }} [skip ci]"
             git push
-            echo "New tag added succesfully."
           else
-            echo "No change had found, skiped commit step."
+            echo "Changes not found."
+            exit 1 
           fi
