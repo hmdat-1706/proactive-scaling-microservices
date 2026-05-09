@@ -33,7 +33,7 @@ metadata:
   name: traefik-monitor
   namespace: kube-system
   labels:
-    release: kube-prometheus-stack 
+    release: prometheus-stack 
 spec:
   selector:
     matchLabels:
