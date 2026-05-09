@@ -123,9 +123,9 @@ spec:
         - name: FRONTEND_ADDR
           value: "192.168.3.134:80"
         - name: USERS
-          value: "3"
+          value: "5"
         - name: RATE
-          value: "1"
+          value: "5"
         resources:
           requests:
             cpu: 50m
