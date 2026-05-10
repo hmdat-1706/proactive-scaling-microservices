@@ -43,7 +43,7 @@ def fetch_daily_metrics():
             
             print(f"[{datetime.now()}] [SUCCESS] Appended {len(df_new)} rows to {DATA_PATH}")
         else:
-            print(f"[{datetime.now()}] [WARN] Ingestion successful but no data returned from Prometheus.")
+            print(f"[{datetime.now()}] [WARN] Data ingestion successful but no data returned from Prometheus.")
             
     except Exception as e:
         print(f"[{datetime.now()}] [ERROR] Prometheus connection failed: {e}")
