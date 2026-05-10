@@ -22,7 +22,7 @@ jobs:
       - name: Lint Python (Flake8)
         run: |
           pip install flake8
-          # Quét lỗi cú pháp nghiêm trọng, bỏ qua lỗi style lặt vặt (để không tạch CI)
+          # Quét lỗi cú pháp nghiêm trọng
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
       - name: Lint YAML Files
@@ -44,10 +44,10 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
 
       - name: Run Kubeconform
-        run: kubeconform -summary -strict -ignore-missing-schemas apps/ || echo "Có vài file YAML cần tối ưu thêm, Audit mode cho qua!"
+        run: kubeconform -summary -strict -ignore-missing-schemas apps/ || echo "Cấu trúc YAML chưa tối ưu, không có lỗi nghiêm trọng."
 
   security-scanning:
-    name: DevSecOps (Trivy Vulnerability Scan)
+    name: Trivy Vulnerability Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
