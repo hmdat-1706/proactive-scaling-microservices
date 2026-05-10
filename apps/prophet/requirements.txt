@@ -1,8 +1,8 @@
-prophet
-pandas
-fastapi
-uvicorn
-setuptools
+prophet==1.1.5
+pandas==2.1.1
+fastapi==0.103.1
+uvicorn==0.23.2
+setuptools==68.2.2
 
 
 mlflow>=3.9.0
