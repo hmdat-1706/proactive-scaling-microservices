@@ -136,7 +136,10 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
 ---
-name: ai-server-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-server-service
   namespace: boutique
 spec:
   ports:
