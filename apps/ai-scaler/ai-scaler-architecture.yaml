@@ -18,7 +18,7 @@ spec:
             - name: ghcr-secret
           containers:
           - name: data-ingestion
-            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:25668a96a3140469254af0048c6204cd1927b831
+            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:df91f6dd5f053d8c2eb93493e80b5a020ad332e0
             imagePullPolicy: Always
             command: ["python", "data_ingestion.py"]
             envFrom:
