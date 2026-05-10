@@ -1,4 +1,4 @@
-name: CI for Prophet Scaler Image
+name: CI for Prophet Scaler
 
 on:
   push:
