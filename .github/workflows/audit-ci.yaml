@@ -1,10 +1,11 @@
-name: Enterprise Audit CI (Security & Manifests)
+---
+name: Audit CI (Security & Manifests)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   quality-checks:
@@ -17,7 +18,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Lint Python (Flake8)
         run: |
@@ -44,7 +45,7 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
 
       - name: Run Kubeconform
-        run: kubeconform -summary -strict -ignore-missing-schemas apps/ || echo "Cấu trúc YAML chưa tối ưu, không có lỗi nghiêm trọng."
+        run: kubeconform -summary -strict -ignore-missing-schemas apps/
 
   security-scanning:
     name: Trivy Vulnerability Scan
@@ -56,8 +57,8 @@ jobs:
       - name: Run Trivy Vulnerability Scanner (Filesystem)
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"

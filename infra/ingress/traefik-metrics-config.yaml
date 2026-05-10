@@ -17,11 +17,11 @@ metadata:
   namespace: kube-system
   labels:
     # Gắn nhãn cho ServiceMonitor tìm
-    metrics-expose: "true" 
+    metrics-expose: "true"
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: traefik 
+    app.kubernetes.io/name: traefik
   ports:
     - name: metrics
       port: 9100
@@ -33,7 +33,7 @@ metadata:
   name: traefik-monitor
   namespace: kube-system
   labels:
-    release: monitoring-stack 
+    release: monitoring-stack
 spec:
   selector:
     matchLabels:

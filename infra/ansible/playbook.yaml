@@ -32,7 +32,7 @@
         name: "K3S_INFO"
         token: "{{ k3s_token_raw.stdout }}"
         master_ip: "{{ ansible_host }}"
-        
+
     - name: Install kubeseal CLI on Master  # Cài đặt kubeseal CLI phục vụ việc mã hóa Secrets
       shell: |
         curl -sL https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.26.2/kubeseal-0.26.2-linux-amd64.tar.gz | tar -xz kubeseal
@@ -69,16 +69,16 @@
       shell: k3s kubectl create namespace argocd --dry-run=client -o yaml | k3s kubectl apply -f -
 
     - name: Install ArgoCD Core  # Sử dụng Server-Side Apply để vượt qua giới hạn kích thước 256KB annotation của CRDs
-      command: k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml 
-      
+      command: k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
     - name: Copy ArgoCD App-of-Apps manifest to Master  # Truyền cấu hình App-of-Apps sang Master Node
       copy:
-        src: ../argocd/argocd-app.yaml  
+        src: ../argocd/argocd-app.yaml
         dest: /tmp/argocd-app.yaml
 
     - name: Apply ArgoCD App-of-Apps (Bootstrap)  # Khởi chạy manifest gốc để kích hoạt tiến trình tự động đồng bộ GitOps
       command: k3s kubectl apply -f /tmp/argocd-app.yaml
-      
+
 - name: Step 5 - Post-Provisioning (Auto Seal Secret)  # Bước 5 - Tự động hóa mã hóa bảo mật sau khi GitOps đã chạy
   hosts: master
   become: yes

@@ -26,33 +26,33 @@ spec:
         app: mlflow
     spec:
       containers:
-      - name: mlflow
-        image: ghcr.io/mlflow/mlflow:latest
-        command:
-          - mlflow
-          - server
-          - --backend-store-uri
-          - sqlite:////mlflow/mlflow.db
-          - --default-artifact-root
-          - /mlflow/artifacts
-          - --serve-artifacts
-          - --host
-          - 0.0.0.0
-          - --port
-          - "5000"
-          - --allowed-hosts
-          - "*"
-          - --cors-allowed-origins
-          - "*"
-        ports:
-        - containerPort: 5000
-        volumeMounts:
-        - name: mlflow-storage
-          mountPath: /mlflow
+        - name: mlflow
+          image: ghcr.io/mlflow/mlflow:latest
+          command:
+            - mlflow
+            - server
+            - --backend-store-uri
+            - sqlite:////mlflow/mlflow.db
+            - --default-artifact-root
+            - /mlflow/artifacts
+            - --serve-artifacts
+            - --host
+            - 0.0.0.0
+            - --port
+            - "5000"
+            - --allowed-hosts
+            - "*"
+            - --cors-allowed-origins
+            - "*"
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: mlflow-storage
+              mountPath: /mlflow
       volumes:
-      - name: mlflow-storage
-        persistentVolumeClaim:
-          claimName: mlflow-storage-pvc
+        - name: mlflow-storage
+          persistentVolumeClaim:
+            claimName: mlflow-storage-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -61,8 +61,8 @@ metadata:
   namespace: boutique
 spec:
   ports:
-  - port: 5000
-    targetPort: 5000
-    name: http-mlflow
+    - port: 5000
+      targetPort: 5000
+      name: http-mlflow
   selector:
     app: mlflow
