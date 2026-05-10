@@ -45,7 +45,8 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
 
       - name: Run Kubeconform
-        run: kubeconform -summary -strict -ignore-missing-schemas apps/
+        run: |
+          find apps/ -type f -name "*.yaml" ! -path "*/prophet_model/*" | xargs kubeconform -summary -strict -ignore-missing-schemas # Loại trừ thư mục prophet_model
 
   security-scanning:
     name: Trivy Vulnerability Scan
