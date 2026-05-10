@@ -111,7 +111,7 @@ spec:
         image: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator:v0.10.5
         env:
         - name: FRONTEND_ADDR
-          value: "192.168.3.134:80"
+          value: "frontend:80"
         - name: USERS
           value: "10"
         - name: RATE
@@ -534,10 +534,6 @@ spec:
             value: "adservice:9555"
           - name: ENABLE_PROFILER
             value: "0"
-          - name: AD_SERVICE_ADDR
-            value: "adservice:9555"
-          - name: RECOMMENDATION_SERVICE_ADDR
-            value: "recommendationservice:8080"
           - name: SHOPPING_ASSISTANT_SERVICE_ADDR
             value: "shoppingassistantservice:80"
           resources:

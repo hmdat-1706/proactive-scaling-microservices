@@ -9,8 +9,13 @@ metadata:
   namespace: boutique
 spec:
   schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 1800
       template:
         spec:
           # Thêm token để kéo Image từ GHCR
@@ -24,6 +29,13 @@ spec:
               envFrom:
                 - configMapRef:
                     name: ai-scaler-config
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
               volumeMounts:
                 - name: shared-mlflow-storage
                   mountPath: /mlflow/artifacts
@@ -43,8 +55,13 @@ metadata:
   namespace: boutique
 spec:
   schedule: "0 2 * * 1"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600
       template:
         spec:
           # Thêm token để kéo Image từ GHCR
@@ -58,6 +75,13 @@ spec:
               envFrom:
                 - configMapRef:
                     name: ai-scaler-config
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 512Mi
+                limits:
+                  cpu: "1"
+                  memory: 1Gi
               volumeMounts:
                 - name: shared-mlflow-storage
                   mountPath: /mlflow/artifacts
@@ -94,16 +118,24 @@ spec:
           envFrom:
             - configMapRef:
                 name: ai-scaler-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ai-server-service
-  namespace: boutique
-spec:
-  ports:
-    - port: 8000
-      targetPort: 8000
-      name: http-api
-  selector:
-    app: ai-server

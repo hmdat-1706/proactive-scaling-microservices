@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hmdat-1706/proactive-scaling-microservices.git
-    targetRevision: HEAD
+    targetRevision: main
     path: infra/autoscaling
   destination:
     server: https://kubernetes.default.svc
