@@ -6,7 +6,7 @@ import os
 from datetime import datetime, timedelta
 
 # Configurations
-MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow-service.boutique.svc.cluster.local:5000")
+MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "file:///mlflow/artifacts")
 DATA_PATH = os.getenv("DATA_PATH", "/mlflow/artifacts/data_lake/test_dataset.csv")
 WINDOW_DAYS = int(os.getenv("RETRAIN_WINDOW_DAYS", "90"))
 DATA_INTERVAL = os.getenv("DATA_INTERVAL", "5")
