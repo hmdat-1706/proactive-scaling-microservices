@@ -28,7 +28,7 @@ jobs:
       - name: Lint YAML Files
         run: |
           sudo apt-get install yamllint -y
-          yamllint -d relaxed .
+          yamllint -f standard .
 
   k8s-manifest-validation:
     name: Validate Kubernetes Manifests
