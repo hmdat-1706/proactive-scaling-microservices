@@ -18,7 +18,7 @@ COPY model_retrain.py .
 COPY ./prophet_model /app/prophet_model 
 
 # Tạo user không có quyền root và cấp quyền sở hữu thư mục /app cho user đó
-RUN useradd -m appuser && chown -R appuser:appuser /app
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000

@@ -6,7 +6,7 @@ metadata:
 data:
   TZ: "Asia/Ho_Chi_Minh"
   MLFLOW_TRACKING_URI: "http://mlflow-service.boutique.svc.cluster.local:5000"
-  PROMETHEUS_URL: "http://monitoring-stack-kube-prom-prometheus.monitoring.svc.cluster.local:9090 api/v1/query_range"
+  PROMETHEUS_URL: "http://monitoring-stack-kube-prom-prometheus.monitoring.svc.cluster.local:9090/api/v1/query_range"
   PROMETHEUS_QUERY: "sum(rate(traefik_service_requests_total[1m]))"
   DATA_PATH: "/mlflow/artifacts/data_lake/test_dataset.csv"
   PREDICT_MINUTES: "15"
