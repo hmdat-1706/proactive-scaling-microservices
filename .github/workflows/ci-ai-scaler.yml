@@ -3,8 +3,8 @@ name: CI for AI Prophet Scaler (DevSecOps)
 on:
   push:
     paths:
-      - 'apps/ai-scaler/**'
-      - '!apps/ai-scaler/ai-configmap.yaml' 
+      - 'apps/prophet/**'
+      - '!apps/prophet/ai-configmap.yaml' 
     branches:
       - main
 
@@ -32,7 +32,7 @@ jobs:
       - name: Build Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./apps/ai-scaler
+          context: ./apps/prophet
           load: true 
           tags: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ github.sha }}
           cache-from: type=gha
@@ -51,7 +51,7 @@ jobs:
       - name: Push Docker Image to Registry
         uses: docker/build-push-action@v5
         with:
-          context: ./apps/ai-scaler
+          context: ./apps/prophet
           push: true
           tags: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ github.sha }}
           cache-from: type=gha
