@@ -1,17 +1,12 @@
+extends: default
 
-extends: defaultignore: |
+ignore: |
+  apps/boutique/google_boutique.yaml
 
-  apps/boutique/google_boutique.yamlrules:
-
+rules:
   line-length: disable
-
   document-start: disable
-
   truthy: disable
-
   comments: disable
-
   trailing-spaces: enable
-
   indentation: enable
-
