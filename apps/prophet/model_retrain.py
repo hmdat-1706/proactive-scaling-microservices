@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 # Configurations
 MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "file:///mlflow/artifacts")
-DATA_PATH = os.getenv("DATA_PATH", "file:///mlflow/artifacts/mlruns")
+DATA_PATH = os.getenv("DATA_PATH", "http://mlflow-service:5000")
 WINDOW_DAYS = int(os.getenv("RETRAIN_WINDOW_DAYS", "90"))
 DATA_INTERVAL = os.getenv("DATA_INTERVAL", "5")
 

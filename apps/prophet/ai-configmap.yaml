@@ -5,7 +5,7 @@ metadata:
   namespace: boutique
 data:
   TZ: "Asia/Ho_Chi_Minh"
-  MLFLOW_TRACKING_URI: "file:///mlflow/artifacts/mlruns"
+  MLFLOW_TRACKING_URI: "http://mlflow-service:5000"
   PROMETHEUS_URL: "http://monitoring-stack-kube-prom-prometheus.monitoring.svc.cluster.local:9090/api/v1/query_range"
   PROMETHEUS_QUERY: "sum(rate(traefik_service_requests_total[1m]))"
   DATASET_PATH: "test_dataset.csv" 
