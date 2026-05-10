@@ -1,4 +1,4 @@
-name: CI for AI Prophet Scaler (DevSecOps)
+name: CI for Prophet Scaler Image
 
 on:
   push:
