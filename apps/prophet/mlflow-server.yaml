@@ -42,6 +42,8 @@ spec:
           - "5000"
           - --allowed-hosts
           - "*"
+          - --cors-allowed-origins
+          - "*"
         ports:
         - containerPort: 5000
         volumeMounts:
