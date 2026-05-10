@@ -90,10 +90,21 @@
       prompt: "Nhập mật khẩu cho Admin Grafana (sẽ bị ẩn khi gõ)"
       private: yes
   tasks:
-    - name: Wait for ArgoCD synchronization and Sealed Secrets Controller initialization
-      pause:
-        seconds: 90
-        prompt: "Waiting for ArgoCD to deploy Sealed Secrets Controller..."
+    - name: Wait for Sealed Secrets Controller to be ready
+      shell: |
+        sudo k3s kubectl wait --for=condition=available \
+          deployment/sealed-secrets-controller \
+          -n kube-system --timeout=300s
+      retries: 3
+      delay: 30
+      register: result
+      until: result.rc == 0
+
+    - name: Ensure target namespaces exist before sealing
+      shell: sudo k3s kubectl create namespace {{ item }} --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+      loop:
+        - boutique
+        - monitoring
 
     - name: Retrieve Public Certificate from Sealed Secrets Controller
       shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
@@ -116,6 +127,12 @@
         --from-literal=admin-password="{{ grafana_password }}" \
         --dry-run=client -o yaml | \
         sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/grafana-sealed.yaml
+
+    - name: Apply Sealed Secrets to cluster
+      shell: sudo k3s kubectl apply -f {{ item }}
+      loop:
+        - /tmp/ghcr-sealed.yaml
+        - /tmp/grafana-sealed.yaml
 
     - name: Retrieve encrypted GHCR manifest to Git repo
       fetch:
