@@ -79,25 +79,52 @@
     - name: Apply ArgoCD App-of-Apps (Bootstrap)  # Khởi chạy manifest gốc để kích hoạt tiến trình tự động đồng bộ GitOps
       command: k3s kubectl apply -f /tmp/argocd-app.yaml
 
-- name: Step 5 - Post-Provisioning (Auto Seal Secret)  # Bước 5 - Tự động hóa mã hóa bảo mật sau khi GitOps đã chạy
+- name: Step 5 - Post-Provisioning (Auto Seal GHCR & Grafana Secrets)
   hosts: master
   become: yes
+  vars_prompt:
+    - name: ghcr_token
+      prompt: "Nhập GitHub PAT Token cho GHCR (sẽ bị ẩn khi gõ)"
+      private: yes
+    - name: grafana_password
+      prompt: "Nhập mật khẩu cho Admin Grafana (sẽ bị ẩn khi gõ)"
+      private: yes
   tasks:
-    - name: Wait for ArgoCD synchronization and Sealed Secrets Controller initialization  # Delay có chủ đích để chờ ArgoCD cài đặt xong các dependencies
+    - name: Wait for ArgoCD synchronization and Sealed Secrets Controller initialization
       pause:
         seconds: 90
         prompt: "Waiting for ArgoCD to deploy Sealed Secrets Controller..."
 
-    - name: Retrieve Public Certificate from Sealed Secrets Controller  # Trích xuất Public Key từ controller mới được tạo
+    - name: Retrieve Public Certificate from Sealed Secrets Controller
       shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
 
-    - name: Generate and encrypt generic secret via Asymmetric Cryptography  # Khởi tạo Secret nguyên bản và mã hóa ngay lập tức bằng thuật toán bất đối xứng
+    - name: Generate and encrypt GHCR Secret (Docker Registry)
       shell: |
-        sudo k3s kubectl create secret generic redis-password --namespace boutique --from-literal=redis-password="23520249" --dry-run=client -o yaml | \
-        sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/redis-sealed.yaml
+        sudo k3s kubectl create secret docker-registry ghcr-secret \
+        --namespace boutique \
+        --docker-server=ghcr.io \
+        --docker-username=hmdat-1706 \
+        --docker-password="{{ ghcr_token }}" \
+        --dry-run=client -o yaml | \
+        sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/ghcr-sealed.yaml
 
-    - name: Retrieve encrypted manifest to Control Node for Git commit  # Kéo file đã mã hóa về máy Control để chuẩn bị đẩy lên VCS
+    - name: Generate and encrypt Grafana Admin Credentials
+      shell: |
+        sudo k3s kubectl create secret generic grafana-admin-credentials \
+        --namespace monitoring \
+        --from-literal=admin-user="admin" \
+        --from-literal=admin-password="{{ grafana_password }}" \
+        --dry-run=client -o yaml | \
+        sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/grafana-sealed.yaml
+
+    - name: Retrieve encrypted GHCR manifest to Git repo
       fetch:
-        src: /tmp/redis-sealed.yaml
-        dest: ~/proactive-scaling-microservices/apps/security/redis-sealed.yaml
+        src: /tmp/ghcr-sealed.yaml
+        dest: ~/proactive-scaling-microservices/apps/security/ghcr-sealed.yaml
+        flat: yes
+
+    - name: Retrieve encrypted Grafana manifest to Git repo
+      fetch:
+        src: /tmp/grafana-sealed.yaml
+        dest: ~/proactive-scaling-microservices/apps/security/grafana-sealed.yaml
         flat: yes

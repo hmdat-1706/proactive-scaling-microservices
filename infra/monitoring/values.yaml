@@ -1,6 +1,9 @@
 # GRAFANA
 grafana:
-  adminPassword: "23520249"
+  admin:
+    existingSecret: "grafana-admin-credentials"
+    userKey: admin-user
+    passwordKey: admin-password
   defaultDashboardsTimezone: "Asia/Ho_Chi_Minh"
   ingress:
     enabled: true
