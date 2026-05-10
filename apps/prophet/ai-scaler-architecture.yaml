@@ -17,21 +17,21 @@ spec:
           imagePullSecrets:
             - name: ghcr-secret
           containers:
-          - name: data-ingestion
-            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:6b3ce0f68b67c402cf99812515eb4624fa637444
-            imagePullPolicy: Always
-            command: ["python", "data_ingestion.py"]
-            envFrom:
-              - configMapRef:
-                  name: ai-scaler-config
-            volumeMounts:
-            - name: shared-mlflow-storage
-              mountPath: /mlflow/artifacts
+            - name: data-ingestion
+              image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:6b3ce0f68b67c402cf99812515eb4624fa637444
+              imagePullPolicy: Always
+              command: ["python", "data_ingestion.py"]
+              envFrom:
+                - configMapRef:
+                    name: ai-scaler-config
+              volumeMounts:
+                - name: shared-mlflow-storage
+                  mountPath: /mlflow/artifacts
           restartPolicy: OnFailure
           volumes:
-          - name: shared-mlflow-storage
-            persistentVolumeClaim:
-              claimName: mlflow-storage-pvc
+            - name: shared-mlflow-storage
+              persistentVolumeClaim:
+                claimName: mlflow-storage-pvc
 ---
 # ==========================================================
 # 2. WEEKLY MODEL RETRAINING JOB (Runs at 02:00 AM every Monday)
@@ -51,21 +51,21 @@ spec:
           imagePullSecrets:
             - name: ghcr-secret
           containers:
-          - name: model-retrain
-            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:6b3ce0f68b67c402cf99812515eb4624fa637444
-            imagePullPolicy: Always
-            command: ["python", "model_retrain.py"]
-            envFrom:
-              - configMapRef:
-                  name: ai-scaler-config
-            volumeMounts:
-            - name: shared-mlflow-storage
-              mountPath: /mlflow/artifacts
+            - name: model-retrain
+              image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:6b3ce0f68b67c402cf99812515eb4624fa637444
+              imagePullPolicy: Always
+              command: ["python", "model_retrain.py"]
+              envFrom:
+                - configMapRef:
+                    name: ai-scaler-config
+              volumeMounts:
+                - name: shared-mlflow-storage
+                  mountPath: /mlflow/artifacts
           restartPolicy: OnFailure
           volumes:
-          - name: shared-mlflow-storage
-            persistentVolumeClaim:
-              claimName: mlflow-storage-pvc
+            - name: shared-mlflow-storage
+              persistentVolumeClaim:
+                claimName: mlflow-storage-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -85,15 +85,15 @@ spec:
       imagePullSecrets:
         - name: ghcr-secret
       containers:
-      - name: ai-server
-        image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:6b3ce0f68b67c402cf99812515eb4624fa637444
-        imagePullPolicy: Always
-        command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
-        ports:
-        - containerPort: 8000
-        envFrom:
-          - configMapRef:
-              name: ai-scaler-config
+        - name: ai-server
+          image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:6b3ce0f68b67c402cf99812515eb4624fa637444
+          imagePullPolicy: Always
+          command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: ai-scaler-config
 ---
 apiVersion: v1
 kind: Service
@@ -102,8 +102,8 @@ metadata:
   namespace: boutique
 spec:
   ports:
-  - port: 8000
-    targetPort: 8000
-    name: http-api
+    - port: 8000
+      targetPort: 8000
+      name: http-api
   selector:
     app: ai-server
