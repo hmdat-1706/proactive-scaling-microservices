@@ -5,15 +5,15 @@ grafana:
   ingress:
     enabled: true
     hosts:
-      - grafana.local 
+      - grafana.local
 
 # PROMETHEUS
 prometheus:
   prometheusSpec:
-    scrapeInterval: "15s" 
+    scrapeInterval: "15s"
     evaluationInterval: "15s"
     retention: "5d"
-    
+
 kubeControllerManager:
   enabled: false
 kubeScheduler:
