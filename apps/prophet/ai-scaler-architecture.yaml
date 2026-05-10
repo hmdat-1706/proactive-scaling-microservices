@@ -136,3 +136,12 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
 ---
+name: ai-server-service
+  namespace: boutique
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+      name: http-api
+  selector:
+    app: ai-server
