@@ -59,12 +59,12 @@ jobs:
 
       - name: Update Manifest Tag
         run: |
-          sed -i "s|image: .*ai-prophet:.*|image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ github.sha }}|g" apps/ai-scaler/ai-scaler-architecture.yaml
+          sed -i "s|image: .*ai-prophet:.*|image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ github.sha }}|g" apps/prophet/ai-scaler-architecture.yaml
           
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add apps/ai-scaler/ai-scaler-architecture.yaml
+          git add apps/prophet/ai-scaler-architecture.yaml
           
           if ! git diff --cached --quiet; then
             git commit -m "chore(gitops): update image tag to ${{ github.sha }} [skip ci]"
