@@ -18,7 +18,7 @@ spec:
             - name: ghcr-secret
           containers:
           - name: data-ingestion
-            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:5d852ecb05fb59f335944d07c986ecbbfb95013a
+            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:a1835558da9bd0c985cce1f1c68c5b3286fb458e
             imagePullPolicy: Always
             command: ["python", "data_ingestion.py"]
             envFrom:
@@ -52,7 +52,7 @@ spec:
             - name: ghcr-secret
           containers:
           - name: model-retrain
-            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:5d852ecb05fb59f335944d07c986ecbbfb95013a
+            image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:a1835558da9bd0c985cce1f1c68c5b3286fb458e
             imagePullPolicy: Always
             command: ["python", "model_retrain.py"]
             envFrom:
@@ -86,7 +86,7 @@ spec:
         - name: ghcr-secret
       containers:
       - name: ai-server
-        image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:5d852ecb05fb59f335944d07c986ecbbfb95013a
+        image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:a1835558da9bd0c985cce1f1c68c5b3286fb458e
         imagePullPolicy: Always
         command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
         ports:
