@@ -124,27 +124,27 @@ Unlike traditional reactive scaling (which responds *after* a spike), this syste
 
 ```mermaid
 graph TD
-    subgraph TRAFFIC ["① Live Traffic"]
-        User(["👤 Users / Load Generator"])
-        Ingress["🔀 Traefik Ingress"]
+    subgraph TRAFFIC ["1. Live Traffic"]
+        User(["Users / Load Generator"])
+        Ingress["Traefik Ingress"]
     end
 
-    subgraph OBSERVE ["② Observability & Data Collection"]
-        Prometheus[("🔥 Prometheus")]
-        DataIngest["⚙️ Data Ingestion CronJob\n(Daily)"]
-        PV[("💾 Shared Data Lake\n(Persistent Volume)")]
+    subgraph OBSERVE ["2. Observability & Data Collection"]
+        Prometheus[("Prometheus")]
+        DataIngest["Data Ingestion CronJob\n(Daily)"]
+        PV[("Shared Data Lake\n(Persistent Volume)")]
     end
 
-    subgraph MLOPS ["③ MLOps Pipeline"]
-        Retrain["🔁 Model Retrain CronJob\n(Weekly)"]
-        MLflow["📦 MLflow Model Registry"]
-        Prophet["🤖 Prophet Server\n(FastAPI /api/forecast)"]
+    subgraph MLOPS ["3. MLOps Pipeline"]
+        Retrain["Model Retrain CronJob\n(Weekly)"]
+        MLflow["MLflow Model Registry"]
+        Prophet["Prophet Server\n(FastAPI /api/forecast)"]
     end
 
-    subgraph SCALE ["④ Proactive Autoscaling"]
-        KEDA["⚡ KEDA Operator\n(External Metrics Trigger)"]
-        HPA["📈 Horizontal Pod Autoscaler"]
-        Pods["🟢 Microservice Pods"]
+    subgraph SCALE ["4. Proactive Autoscaling"]
+        KEDA["KEDA Operator\n(External Metrics Trigger)"]
+        HPA["Horizontal Pod Autoscaler"]
+        Pods["Microservice Pods"]
     end
 
     User -->|"HTTP Requests"| Ingress
@@ -157,7 +157,7 @@ graph TD
     MLflow -->|"Load Latest Model"| Prophet
     Prophet -->|"Expose Forecasted RPS"| KEDA
     KEDA -->|"Calculate Desired Replicas"| HPA
-    HPA -->|"⚡ Scale UP before traffic hits"| Pods
+    HPA -->|"Scale UP before traffic hits"| Pods
 ```
 
 > **Design Decision:** The AI server uses a fixed model trained on synthetic (mock) data for demo stability. The retrain pipeline exists to demonstrate the complete MLOps architecture, but real Prometheus data lacks sufficient seasonality for accurate predictions in a lab environment.
@@ -178,40 +178,38 @@ graph TD
 The full lifecycle — from a developer pushing code to pods rolling out — is fully automated and auditable through Git.
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Dev as 👤 Dev / Admin
-    participant Git as 🐙 GitHub Repo
-    participant GHA as ⚙️ GitHub Actions (CI)
-    participant GHCR as 📦 GHCR Registry
-    participant Argo as 🔄 ArgoCD (CD)
-    participant K3s as ☸️ K3s Cluster
+graph TD
+    Dev(["Developer / Admin"])
 
-    rect rgb(230, 243, 255)
-        Note over Dev,K3s: 🚀 Phase 1 — Infrastructure Bootstrap (Nuke & Redeploy via Ansible)
-        Dev->>K3s: ansible-playbook playbook.yaml
-        K3s-->>K3s: Uninstall old cluster (nuke)
-        K3s-->>K3s: Install K3s + KEDA + ArgoCD
-        K3s-->>K3s: Apply Sealed Secrets & App-of-Apps
-        K3s-->>Dev: ✅ Cluster Ready (clean state)
+    subgraph INFRA ["Phase 1: Infrastructure Bootstrap"]
+        Ansible["Ansible Playbook"]
+        K3s["K3s Cluster\n(+ ArgoCD installed)"]
     end
 
-    rect rgb(240, 255, 240)
-        Note over Dev,K3s: 🔁 Phase 2 — Continuous Delivery (GitOps)
-        Dev->>Git: git push (code change)
-        Git->>GHA: Trigger CI Workflow
-        GHA->>GHA: Flake8 lint + yamllint + Kubeconform
-        GHA->>GHA: Docker Buildx (multi-layer cache)
-        GHA->>GHA: Trivy scan — block CRITICAL/HIGH
-        GHA->>GHCR: Push Docker image :sha-xxxxxx
-        GHA->>Git: Auto-commit updated image tag
-        loop Every 3 minutes
-            Argo->>Git: Watch for manifest changes
-        end
-        Git-->>Argo: Drift detected!
-        Argo->>K3s: Sync & Apply new manifests
-        K3s-->>Argo: ✅ App Healthy
+    subgraph CI ["Phase 2: CI Pipeline"]
+        Code["GitHub - Source Code"]
+        GHA["GitHub Actions\n(Lint, Build, Scan)"]
+        GHCR["GHCR - Image Registry"]
     end
+
+    subgraph CD ["Phase 3: CD Pipeline - GitOps"]
+        Manifests["GitHub - K8s Manifests"]
+        Argo["ArgoCD Controller"]
+        Pods["Microservices Pods"]
+    end
+
+    %% Flow connections
+    Dev -->|"1. Run nuke-and-redeploy"| Ansible
+    Ansible -->|"2. Provision bare-metal"| K3s
+
+    Dev -->|"3. git push code"| Code
+    Code -->|"4. Trigger Workflow"| GHA
+    GHA -->|"5. Push Docker Image"| GHCR
+    GHA -->|"6. Auto-commit new Image Tag"| Manifests
+
+    Argo -->|"7. Watch for drift"| Manifests
+    Argo -->|"8. Sync & Apply"| Pods
+    Pods -.->|"9. Pull new Image"| GHCR
 ```
 
 ## 📊 Monitoring Access
