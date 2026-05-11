@@ -62,7 +62,7 @@
   hosts: master
   become: yes
   tasks:
-    - name: Install KEDA Core (Auto-scaling engine)  # BƠM VÀO ĐÂY: Cài KEDA TRƯỚC để K3s học các CRDs về Scaling
+    - name: Install KEDA Core
       command: k3s kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.13.1/keda-2.13.1.yaml
 
     - name: Create ArgoCD Namespace
@@ -70,6 +70,12 @@
 
     - name: Install ArgoCD Core  # Sử dụng Server-Side Apply để vượt qua giới hạn kích thước 256KB annotation của CRDs
       command: k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+      
+    - name: Configure ArgoCD to run in insecure mode (Fix TLS Redirect)
+      command: k3s kubectl patch configmap argocd-cmd-params-cm -n argocd -p '{"data": {"server.insecure": "true"}}'
+
+    - name: Restart ArgoCD Server
+      command: k3s kubectl rollout restart deployment argocd-server -n argocd
 
     - name: Copy ArgoCD App-of-Apps manifest to Master  # Truyền cấu hình App-of-Apps sang Master Node
       copy:
@@ -93,15 +99,20 @@
       prompt: "ArgoCD Admin Password: "
       private: yes
   tasks:
-    - name: Wait for Sealed Secrets Controller to be ready
+    - name: Wait for Sealed Secrets Controller to be created and ready
       shell: |
-        sudo k3s kubectl wait --for=condition=available \
-          deployment/sealed-secrets-controller \
-          -n kube-system --timeout=300s
-      retries: 3
-      delay: 30
-      register: result
-      until: result.rc == 0
+        echo "Waiting for ArgoCD to sync and create the deployment..."
+        count=0
+        while ! sudo k3s kubectl get deployment sealed-secrets-controller -n kube-system > /dev/null 2>&1; do
+          if [ $count -ge 30 ]; then
+            echo "Timeout waiting for deployment creation!"
+            exit 1
+          fi
+          sleep 10
+          count=$((count+1))
+        done
+        echo "Deployment found! Waiting for it to become available..."
+        sudo k3s kubectl wait --for=condition=available deployment/sealed-secrets-controller -n kube-system --timeout=300s
 
     - name: Ensure target namespaces exist before sealing
       shell: sudo k3s kubectl create namespace {{ item }} --dry-run=client -o yaml | sudo k3s kubectl apply -f -
