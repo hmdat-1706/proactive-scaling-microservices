@@ -9,7 +9,7 @@
         update_cache: yes
         state: present
 
-- name: Step 2 - Provision Master Node (Control Plane + Infra)
+- name: Step 2 - Provision Master Node  # Bước 2 - Khởi tạo Master Node (Control Plane)
   hosts: master
   become: yes
   tasks:
@@ -40,12 +40,7 @@
       args:
         creates: /usr/local/bin/kubeseal
 
-    - name: Taint master node to separate platform tools from application workloads
-      command: >
-        k3s kubectl taint nodes {{ ansible_hostname }}
-        node-role=infra:PreferNoSchedule --overwrite
-
-- name: Step 3 - Provision Worker Node (Application Workloads)
+- name: Step 3 - Provision Worker Node & Join Cluster  # Bước 3 - Khởi tạo Worker Node và thiết lập kết nối vào Cluster
   hosts: worker
   become: yes
   tasks:
@@ -63,17 +58,11 @@
       args:
         creates: /etc/rancher/k3s/k3s-agent.env
 
-    - name: Label worker node for application workloads  # Phối hợp với taint trên master để phân tách workload
-      command: >-
-        k3s kubectl label nodes {{ ansible_hostname }}
-        node-role=app --overwrite
-      delegate_to: "{{ groups['master'][0] }}"
-
 - name: Step 4 - Bootstrap Infrastructure (KEDA & ArgoCD)  # Bước 4 - Cài đặt hạ tầng lõi và GitOps Controller
   hosts: master
   become: yes
   tasks:
-    - name: Install KEDA Core  # Bootstrap trước ArgoCD sync vì ScaledObjects cần KEDA CRDs tồn tại sẵn
+    - name: Install KEDA Core
       command: k3s kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.13.1/keda-2.13.1.yaml
 
     - name: Create ArgoCD Namespace

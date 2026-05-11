@@ -190,9 +190,9 @@ ansible-playbook playbook.yaml
 
 The playbook will:
 1. Install base packages on all nodes
-2. Provision K3s control plane + kubeseal CLI + taint master (`PreferNoSchedule`)
-3. Join worker node to cluster + label as application node (`node-role=app`)
-4. Bootstrap KEDA (CRD dependency) + ArgoCD + Apply App-of-Apps
+2. Provision K3s control plane + install kubeseal CLI
+3. Join worker node to the cluster
+4. Install KEDA + ArgoCD + Apply App-of-Apps
 5. Prompt for GHCR token, Grafana password & ArgoCD password → auto-seal, apply & set credentials
 
 ### 3. Verify Deployment
@@ -273,7 +273,6 @@ Push to apps/prophet/** on main
 
 ## 📝 Known Limitations
 
-- **Soft workload isolation:** Master node uses `PreferNoSchedule` taint to separate platform tools from application pods. A production setup would use dedicated node pools with hard `NoSchedule` taints
 - **Single-environment:** No dev/staging separation (lab scope)
 - **No TLS:** `.local` domains use HTTP only (would use cert-manager + Let's Encrypt in production)
 - **No alerting rules:** Prometheus collects metrics but no PrometheusRule CRDs for alerts
