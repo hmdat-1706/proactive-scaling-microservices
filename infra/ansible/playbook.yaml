@@ -134,14 +134,14 @@
         - /tmp/ghcr-sealed.yaml
         - /tmp/grafana-sealed.yaml
 
-    - name: Retrieve encrypted GHCR manifest to Git repo
+    - name: Retrieve encrypted GHCR manifest to Git repo  # Lưu về đúng path ArgoCD đang watch (apps/prophet)
       fetch:
         src: /tmp/ghcr-sealed.yaml
-        dest: ~/proactive-scaling-microservices/apps/security/ghcr-sealed.yaml
+        dest: ~/proactive-scaling-microservices/apps/prophet/ghcr_sealed.yaml
         flat: yes
 
-    - name: Retrieve encrypted Grafana manifest to Git repo
+    - name: Retrieve encrypted Grafana manifest to Git repo  # Lưu bên cạnh values.yaml của monitoring
       fetch:
         src: /tmp/grafana-sealed.yaml
-        dest: ~/proactive-scaling-microservices/apps/security/grafana-sealed.yaml
+        dest: ~/proactive-scaling-microservices/infra/monitoring/grafana-sealed.yaml
         flat: yes
