@@ -16,105 +16,15 @@ This project implements a **Proactive Autoscaling Platform** for microservices d
 The entire platform is managed through **GitOps (ArgoCD)** and provisioned via **Ansible automation**, enabling full cluster bootstrap from bare metal to a production-ready state in a single command.
 
 ### Key Highlights
-- 🤖 **AI-Driven Proactive Scaling** — KEDA polls a FastAPI prediction endpoint to pre-scale services before traffic spikes occur
-- 🔄 **GitOps (ArgoCD App-of-Apps)** — Single bootstrap point for the entire infrastructure with automated synchronization
-- 🔐 **DevSecOps Pipeline** — GitHub Actions with Trivy vulnerability scanning, yamllint, kubeconform, and Flake8
-- 🔑 **Zero Plaintext Secrets** — Bitnami Sealed Secrets with automated certificate retrieval and encryption via Ansible
-- 📊 **Full Observability** — kube-prometheus-stack with custom Traefik ServiceMonitor for RPS metrics
+- **AI-Driven Proactive Scaling** — KEDA polls a FastAPI prediction endpoint to pre-scale services before traffic spikes occur
+- **GitOps (ArgoCD App-of-Apps)** — Single bootstrap point for the entire infrastructure with automated synchronization
+- **DevSecOps Pipeline** — GitHub Actions with Trivy vulnerability scanning, yamllint, kubeconform, and Flake8
+- **Zero Plaintext Secrets** — Bitnami Sealed Secrets with automated certificate retrieval and encryption via Ansible
+- **Full Observability** — kube-prometheus-stack with custom Traefik ServiceMonitor for RPS metrics
 
 ## 🏗️ Architecture
 
-<!-- Replace this section with your draw.io diagram -->
-<!-- See the mermaid diagram below for reference -->
-
-```mermaid
-graph TB
-    subgraph "Developer Workstation"
-        DEV[Developer Push]
-    end
-
-    subgraph "GitHub"
-        REPO[Git Repository]
-        subgraph "GitHub Actions CI"
-            LINT[yamllint + Flake8 + Kubeconform]
-            BUILD[Docker Build]
-            TRIVY[Trivy Vulnerability Scan]
-            PUSH[Push to GHCR]
-            TAG[Update Manifest Tag]
-        end
-    end
-
-    subgraph "K3s Cluster"
-        subgraph "GitOps Layer"
-            ARGO[ArgoCD]
-            AOAPPS["App-of-Apps (Root)"]
-        end
-
-        subgraph "Application Layer — namespace: boutique"
-            FRONT[Frontend]
-            CART[Cart Service]
-            CHECKOUT[Checkout Service]
-            PRODUCT[Product Catalog]
-            CURRENCY[Currency Service]
-            SHIPPING[Shipping Service]
-            PAYMENT[Payment Service]
-            EMAIL[Email Service]
-            REDIS[Redis]
-            LOADGEN[Load Generator]
-        end
-
-        subgraph "AI Scaling Layer — namespace: boutique"
-            AI[AI Server - FastAPI]
-            MODEL["Prophet Model (Fixed)"]
-            MLFLOW[MLflow Tracking Server]
-            INGEST[Data Ingestion CronJob]
-            RETRAIN[Model Retrain CronJob]
-            PVC[Shared PVC Storage]
-        end
-
-        subgraph "Scaling Engine"
-            KEDA[KEDA]
-            SCALEOBJ["ScaledObjects (8 services)"]
-        end
-
-        subgraph "Observability — namespace: monitoring"
-            PROM[Prometheus]
-            GRAFANA[Grafana]
-            TRAEFIK_MON[Traefik ServiceMonitor]
-        end
-
-        subgraph "Security — namespace: kube-system"
-            SEALED[Sealed Secrets Controller]
-        end
-
-        subgraph "Ingress — namespace: kube-system"
-            TRAEFIK[Traefik Ingress]
-        end
-    end
-
-    DEV --> REPO
-    REPO --> LINT --> BUILD --> TRIVY --> PUSH --> TAG
-    TAG -->|update image SHA| REPO
-    REPO -->|watch & sync| ARGO
-    ARGO --> AOAPPS
-    AOAPPS -->|sync| FRONT & AI & PROM & KEDA & SEALED & TRAEFIK
-
-    KEDA -->|poll /api/forecast| AI
-    AI --> MODEL
-    KEDA -->|scale| SCALEOBJ
-    SCALEOBJ -->|adjust replicas| FRONT & CART & CHECKOUT & PRODUCT
-
-    TRAEFIK -->|expose metrics| TRAEFIK_MON
-    TRAEFIK_MON -->|scrape| PROM
-    PROM -->|query| INGEST
-    INGEST -->|store data| PVC
-    RETRAIN -->|read data| PVC
-    RETRAIN -->|push model| MLFLOW
-
-    GRAFANA -->|visualize| PROM
-```
-
-> **Note:** This Mermaid diagram is a reference for the system architecture. For the final report, recreate this in [draw.io](https://draw.io) for a cleaner presentation.
+![Enterprise Architecture Blueprint](./docs/images/Diagram.png)
 
 ## 📂 Repository Structure
 
