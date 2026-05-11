@@ -79,15 +79,18 @@
     - name: Apply ArgoCD App-of-Apps (Bootstrap)  # Khởi chạy manifest gốc để kích hoạt tiến trình tự động đồng bộ GitOps
       command: k3s kubectl apply -f /tmp/argocd-app.yaml
 
-- name: Step 5 - Post-Provisioning (Auto Seal GHCR & Grafana Secrets)
+- name: Step 5 - Post-Provisioning (Auto Seal Secrets & Set Credentials)
   hosts: master
   become: yes
   vars_prompt:
     - name: ghcr_token
-      prompt: "Nhập GitHub PAT Token cho GHCR (sẽ bị ẩn khi gõ)"
+      prompt: "GitHub PAT Token for GHCR: "
       private: yes
     - name: grafana_password
-      prompt: "Nhập mật khẩu cho Admin Grafana (sẽ bị ẩn khi gõ)"
+      prompt: "Grafana Admin Password: "
+      private: yes
+    - name: argocd_password
+      prompt: "ArgoCD Admin Password: "
       private: yes
   tasks:
     - name: Wait for Sealed Secrets Controller to be ready
@@ -133,6 +136,21 @@
       loop:
         - /tmp/ghcr-sealed.yaml
         - /tmp/grafana-sealed.yaml
+
+    - name: Install apache2-utils for password hashing  # Cài htpasswd để tạo bcrypt hash cho ArgoCD
+      apt:
+        name: apache2-utils
+        state: present
+
+    - name: Generate bcrypt hash and set ArgoCD admin password  # Patch trực tiếp argocd-secret
+      shell: |
+        HASH=$(htpasswd -nbBC 10 "" '{{ argocd_password }}' | tr -d ':\n' | sed 's/\$2y/\$2a/')
+        MTIME=$(date +%FT%T%Z)
+        sudo k3s kubectl -n argocd patch secret argocd-secret \
+          -p "{\"stringData\": {\"admin.password\": \"${HASH}\", \"admin.passwordMtime\": \"${MTIME}\"}}"
+
+    - name: Restart ArgoCD Server to apply new password  # Đảm bảo ArgoCD nhận password mới
+      shell: sudo k3s kubectl -n argocd rollout restart deployment argocd-server
 
     - name: Retrieve encrypted GHCR manifest to Git repo  # Lưu về đúng path ArgoCD đang watch (apps/prophet)
       fetch:
