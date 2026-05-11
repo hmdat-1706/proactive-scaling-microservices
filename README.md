@@ -120,14 +120,44 @@ k3s kubectl get pods -A
 
 ## 🤖 How Proactive Scaling Works
 
-```
-1. Traefik receives traffic → exposes RPS metrics
-2. Prometheus scrapes Traefik metrics via ServiceMonitor
-3. Data Ingestion CronJob (daily) → queries Prometheus → appends to CSV
-4. Model Retrain CronJob (weekly) → trains Prophet on sliding window → pushes to MLflow
-5. AI Server loads Prophet model → exposes GET /api/forecast → returns predicted RPS
-6. KEDA polls /api/forecast every 30s → scales frontend BEFORE traffic arrives
-7. Other services use CPU-based reactive scaling as fallback
+Unlike traditional reactive scaling (which responds *after* a spike), this system continuously forecasts future traffic and pre-scales services *before* demand arrives.
+
+```mermaid
+graph TD
+    subgraph TRAFFIC ["① Live Traffic"]
+        User(["👤 Users / Load Generator"])
+        Ingress["🔀 Traefik Ingress"]
+    end
+
+    subgraph OBSERVE ["② Observability & Data Collection"]
+        Prometheus[("🔥 Prometheus")]
+        DataIngest["⚙️ Data Ingestion CronJob\n(Daily)"]
+        PV[("💾 Shared Data Lake\n(Persistent Volume)")]
+    end
+
+    subgraph MLOPS ["③ MLOps Pipeline"]
+        Retrain["🔁 Model Retrain CronJob\n(Weekly)"]
+        MLflow["📦 MLflow Model Registry"]
+        Prophet["🤖 Prophet Server\n(FastAPI /api/forecast)"]
+    end
+
+    subgraph SCALE ["④ Proactive Autoscaling"]
+        KEDA["⚡ KEDA Operator\n(External Metrics Trigger)"]
+        HPA["📈 Horizontal Pod Autoscaler"]
+        Pods["🟢 Microservice Pods"]
+    end
+
+    User -->|"HTTP Requests"| Ingress
+    Ingress -->|"Route to"| Pods
+    Ingress -.->|"Scrape RPS Metrics"| Prometheus
+    Prometheus -->|"Query Historical Data"| DataIngest
+    DataIngest -->|"Append Dataset"| PV
+    PV -->|"Load Training Data"| Retrain
+    Retrain -->|"Register New Model"| MLflow
+    MLflow -->|"Load Latest Model"| Prophet
+    Prophet -->|"Expose Forecasted RPS"| KEDA
+    KEDA -->|"Calculate Desired Replicas"| HPA
+    HPA -->|"⚡ Scale UP before traffic hits"| Pods
 ```
 
 > **Design Decision:** The AI server uses a fixed model trained on synthetic (mock) data for demo stability. The retrain pipeline exists to demonstrate the complete MLOps architecture, but real Prometheus data lacks sufficient seasonality for accurate predictions in a lab environment.
@@ -143,17 +173,45 @@ k3s kubectl get pods -A
 | **CI Pipeline** | Trivy scan blocks CRITICAL/HIGH vulnerabilities |
 | **Code Quality** | Flake8 (Python) + yamllint (YAML) + Kubeconform (K8s schemas) |
 
-## 🔄 CI/CD Pipeline
+## 🔄 CI/CD Pipeline & GitOps Workflow
 
-```
-Push to apps/prophet/** on main
-    │
-    ├── Build Docker Image (Buildx + GHA layer cache)
-    ├── Trivy Vulnerability Scan (block on CRITICAL/HIGH)
-    ├── Push to GitHub Container Registry
-    └── Update image tag in ai-scaler-architecture.yaml (git commit + push)
-            │
-            └── ArgoCD detects change → auto-sync → rolling update
+The full lifecycle — from a developer pushing code to pods rolling out — is fully automated and auditable through Git.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as 👤 Dev / Admin
+    participant Git as 🐙 GitHub Repo
+    participant GHA as ⚙️ GitHub Actions (CI)
+    participant GHCR as 📦 GHCR Registry
+    participant Argo as 🔄 ArgoCD (CD)
+    participant K3s as ☸️ K3s Cluster
+
+    rect rgb(230, 243, 255)
+        Note over Dev,K3s: 🚀 Phase 1 — Infrastructure Bootstrap (Nuke & Redeploy via Ansible)
+        Dev->>K3s: ansible-playbook playbook.yaml
+        K3s-->>K3s: Uninstall old cluster (nuke)
+        K3s-->>K3s: Install K3s + KEDA + ArgoCD
+        K3s-->>K3s: Apply Sealed Secrets & App-of-Apps
+        K3s-->>Dev: ✅ Cluster Ready (clean state)
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Dev,K3s: 🔁 Phase 2 — Continuous Delivery (GitOps)
+        Dev->>Git: git push (code change)
+        Git->>GHA: Trigger CI Workflow
+        GHA->>GHA: Flake8 lint + yamllint + Kubeconform
+        GHA->>GHA: Docker Buildx (multi-layer cache)
+        GHA->>GHA: Trivy scan — block CRITICAL/HIGH
+        GHA->>GHCR: Push Docker image :sha-xxxxxx
+        GHA->>Git: Auto-commit updated image tag
+        loop Every 3 minutes
+            Argo->>Git: Watch for manifest changes
+        end
+        Git-->>Argo: Drift detected!
+        Argo->>K3s: Sync & Apply new manifests
+        K3s-->>Argo: ✅ App Healthy
+    end
 ```
 
 ## 📊 Monitoring Access
