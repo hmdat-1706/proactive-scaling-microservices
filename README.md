@@ -130,10 +130,12 @@ graph TB
 │       ├── ai_server.py         # FastAPI prediction endpoint (/api/forecast)
 │       ├── data_ingestion.py    # Daily Prometheus → CSV data pipeline
 │       ├── model_retrain.py     # Weekly sliding window retraining
+│       ├── requirements.txt     # Pinned Python dependencies
 │       ├── ai-scaler-architecture.yaml  # CronJobs + Deployment + Service
 │       ├── ai-configmap.yaml    # Environment configuration
 │       ├── mlflow-server.yaml   # MLflow Tracking Server
 │       ├── ghcr_sealed.yaml     # Encrypted GHCR registry credentials
+│       ├── data/                # Mock datasets for Prophet training
 │       └── prophet_model/       # Baked-in Prophet model artifact
 ├── infra/
 │   ├── ansible/
@@ -191,7 +193,7 @@ The playbook will:
 2. Provision K3s control plane + install kubeseal CLI
 3. Join worker node to the cluster
 4. Install KEDA + ArgoCD + Apply App-of-Apps
-5. Prompt for GHCR token & Grafana password → auto-seal and apply
+5. Prompt for GHCR token, Grafana password & ArgoCD password → auto-seal, apply & set credentials
 
 ### 3. Verify Deployment
 
@@ -226,6 +228,7 @@ k3s kubectl get pods -A
 |-------|---------------|
 | **Container Registry** | Sealed Secret (`ghcr_sealed.yaml`) — asymmetric encryption |
 | **Grafana Admin** | Sealed Secret via Ansible `vars_prompt` — no plaintext in Git |
+| **ArgoCD Admin** | bcrypt-hashed password via Ansible `vars_prompt` — patched at provision time |
 | **Container Runtime** | Non-root user (UID 1000) + Pod `securityContext` |
 | **CI Pipeline** | Trivy scan blocks CRITICAL/HIGH vulnerabilities |
 | **Code Quality** | Flake8 (Python) + yamllint (YAML) + Kubeconform (K8s schemas) |
@@ -249,7 +252,7 @@ Push to apps/prophet/** on main
 |---------|-----|-------------|
 | Boutique Shop | `http://web.local` | — |
 | Grafana | `http://grafana.local` | Set during playbook run |
-| ArgoCD | `http://argocd.local` | `admin` / `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' \| base64 -d` |
+| ArgoCD | `http://argocd.local` | `admin` / Set during playbook run |
 | AI Forecast API | `http://api.local/api/forecast` | — |
 | MLflow | `http://mlflow.local` | — |
 
