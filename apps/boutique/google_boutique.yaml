@@ -113,7 +113,7 @@ spec:
         - name: FRONTEND_ADDR
           value: "frontend:80"
         - name: USERS
-          value: "10"
+          value: "5"
         - name: RATE
           value: "5"
         resources:
