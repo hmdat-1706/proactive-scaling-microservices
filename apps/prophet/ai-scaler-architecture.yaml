@@ -1,7 +1,5 @@
 ---
-# ==========================================================
 # 1. DAILY DATA INGESTION JOB (Runs at 02:00 AM Daily)
-# ==========================================================
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -23,7 +21,7 @@ spec:
             - name: ghcr-secret
           containers:
             - name: data-ingestion
-              image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:f4428add3af0b9ba9603b0e5e0d3e65ffabc9091
+              image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:d3e5dddc58c8f9d1cecb2a05c03e4f1346928db0
               imagePullPolicy: Always
               command: ["python", "data_ingestion.py"]
               envFrom:
@@ -45,9 +43,7 @@ spec:
               persistentVolumeClaim:
                 claimName: mlflow-storage-pvc
 ---
-# ==========================================================
 # 2. WEEKLY MODEL RETRAINING JOB (Runs at 02:00 AM every Monday)
-# ==========================================================
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -69,7 +65,7 @@ spec:
             - name: ghcr-secret
           containers:
             - name: model-retrain
-              image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:f4428add3af0b9ba9603b0e5e0d3e65ffabc9091
+              image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:d3e5dddc58c8f9d1cecb2a05c03e4f1346928db0
               imagePullPolicy: Always
               command: ["python", "model_retrain.py"]
               envFrom:
@@ -91,6 +87,7 @@ spec:
               persistentVolumeClaim:
                 claimName: mlflow-storage-pvc
 ---
+# 3. AI SERVER
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -114,7 +111,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: ai-server
-          image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:f4428add3af0b9ba9603b0e5e0d3e65ffabc9091
+          image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:d3e5dddc58c8f9d1cecb2a05c03e4f1346928db0
           imagePullPolicy: Always
           command: ["uvicorn", "ai_server:app", "--host", "0.0.0.0", "--port", "8000"]
           ports:

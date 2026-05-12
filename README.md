@@ -105,7 +105,7 @@ The playbook will:
 4. Install KEDA + ArgoCD + apply App-of-Apps manifest
 5. Prompt for credentials → wait for ArgoCD to sync Sealed Secrets → encrypt and apply GHCR & Grafana secrets → set ArgoCD admin password
 
-> **Note:** Step 5 polls for the `sealed-secrets` deployment in `kube-system` (Bitnami Helm chart default name) with a 6-minute timeout before proceeding. Sensitive values are protected with `no_log: true` during execution.
+> **Note:** Step 5 polls for the `sealed-secrets-controller` deployment in `kube-system` with a 10-minute timeout before proceeding to allow ArgoCD enough time to sync. Sensitive values are protected with `no_log: true` during execution.
 
 ### 3. Verify Deployment
 
@@ -116,8 +116,8 @@ k3s kubectl get applications -n argocd
 # Check all pods
 k3s kubectl get pods -A
 
-# Verify sealed-secrets controller is running (Helm default name is 'sealed-secrets')
-k3s kubectl get deployment sealed-secrets -n kube-system
+# Verify sealed-secrets controller is running
+k3s kubectl get deployment sealed-secrets-controller -n kube-system
 
 # Access services (add to /etc/hosts)
 # <MASTER_IP> web.local grafana.local argocd.local api.local mlflow.local
