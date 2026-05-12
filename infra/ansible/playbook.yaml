@@ -105,8 +105,8 @@
         echo "Waiting for ArgoCD to sync and create the deployment..."
         count=0
         while ! sudo k3s kubectl get deployment sealed-secrets -n kube-system > /dev/null 2>&1; do
-          if [ $count -ge 30 ]; then
-            echo "Timeout waiting for deployment creation!"
+          if [ $count -ge 60 ]; then
+            echo "Timeout waiting for deployment creation (10 minutes)!"
             exit 1
           fi
           sleep 10
