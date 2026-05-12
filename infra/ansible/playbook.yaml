@@ -1,5 +1,5 @@
 ---
-- name: Step 1 - Install Base Packages  # Bước 1 - Cài đặt các system packages cơ bản
+- name: Step 1 - Install Curl # Bước 1 - Cài đặt Curl
   hosts: all
   become: yes
   tasks:
@@ -9,7 +9,7 @@
         update_cache: yes
         state: present
 
-- name: Step 2 - Provision Master Node  # Bước 2 - Khởi tạo Master Node (Control Plane)
+- name: Step 2 - Install K3s Control Plane  # Bước 2 - Cài đặt K3s Control Plane
   hosts: master
   become: yes
   tasks:
@@ -26,6 +26,7 @@
     - name: Read K3s Node Token  # Lay token xác thực của cụm
       command: cat /var/lib/rancher/k3s/server/node-token
       register: k3s_token_raw
+      changed_when: false
 
     - name: Store Token for Worker nodes  # Lưu token vào Ansible facts để cấp quyền join cụm cho Worker
       add_host:
@@ -62,13 +63,13 @@
   hosts: master
   become: yes
   tasks:
-    - name: Install KEDA Core
+    - name: Install KEDA
       command: k3s kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.13.1/keda-2.13.1.yaml
 
     - name: Create ArgoCD Namespace
       shell: k3s kubectl create namespace argocd --dry-run=client -o yaml | k3s kubectl apply -f -
 
-    - name: Install ArgoCD Core  # Sử dụng Server-Side Apply để vượt qua giới hạn kích thước 256KB annotation của CRDs
+    - name: Install ArgoCD  # Sử dụng Server-Side Apply để vượt qua giới hạn kích thước 256KB annotation của CRDs
       command: k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
     - name: Configure ArgoCD to run in insecure mode (Fix TLS Redirect)
@@ -91,13 +92,13 @@
   become: yes
   vars_prompt:
     - name: ghcr_token
-      prompt: "GitHub PAT Token for GHCR: "
+      prompt: "GitHub PAT Token for GHCR"
       private: yes
     - name: grafana_password
-      prompt: "Grafana Admin Password: "
+      prompt: "Grafana Admin Password"
       private: yes
     - name: argocd_password
-      prompt: "ArgoCD Admin Password: "
+      prompt: "ArgoCD Admin Password"
       private: yes
   tasks:
     - name: Wait for Sealed Secrets Controller to be created and ready
@@ -123,6 +124,7 @@
 
     - name: Retrieve Public Certificate from Sealed Secrets Controller
       shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
+      changed_when: false
 
     - name: Generate and encrypt GHCR Secret (Docker Registry)
       shell: |
@@ -133,6 +135,7 @@
         --docker-password="{{ ghcr_token }}" \
         --dry-run=client -o yaml | \
         sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/ghcr-sealed.yaml
+      no_log: true
 
     - name: Generate and encrypt Grafana Admin Credentials
       shell: |
@@ -142,6 +145,7 @@
         --from-literal=admin-password="{{ grafana_password }}" \
         --dry-run=client -o yaml | \
         sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/grafana-sealed.yaml
+      no_log: true
 
     - name: Apply Sealed Secrets to cluster
       shell: sudo k3s kubectl apply -f {{ item }}
@@ -160,6 +164,7 @@
         MTIME=$(date +%FT%T%Z)
         sudo k3s kubectl -n argocd patch secret argocd-secret \
           -p "{\"stringData\": {\"admin.password\": \"${HASH}\", \"admin.passwordMtime\": \"${MTIME}\"}}"
+      no_log: true
 
     - name: Restart ArgoCD Server to apply new password  # Đảm bảo ArgoCD nhận password mới
       shell: sudo k3s kubectl -n argocd rollout restart deployment argocd-server

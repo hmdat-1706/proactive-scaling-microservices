@@ -1,7 +1,5 @@
 ---
-# ==========================================================
 # 1. DAILY DATA INGESTION JOB (Runs at 02:00 AM Daily)
-# ==========================================================
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -45,9 +43,7 @@ spec:
               persistentVolumeClaim:
                 claimName: mlflow-storage-pvc
 ---
-# ==========================================================
 # 2. WEEKLY MODEL RETRAINING JOB (Runs at 02:00 AM every Monday)
-# ==========================================================
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -91,6 +87,7 @@ spec:
               persistentVolumeClaim:
                 claimName: mlflow-storage-pvc
 ---
+# 3. AI SERVER
 apiVersion: apps/v1
 kind: Deployment
 metadata:
