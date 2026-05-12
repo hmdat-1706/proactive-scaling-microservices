@@ -104,7 +104,7 @@
       shell: |
         echo "Waiting for ArgoCD to sync and create the deployment..."
         count=0
-        while ! sudo k3s kubectl get deployment sealed-secrets-controller -n kube-system > /dev/null 2>&1; do
+        while ! sudo k3s kubectl get deployment sealed-secrets -n kube-system > /dev/null 2>&1; do
           if [ $count -ge 30 ]; then
             echo "Timeout waiting for deployment creation!"
             exit 1
@@ -113,7 +113,7 @@
           count=$((count+1))
         done
         echo "Deployment found! Waiting for it to become available..."
-        sudo k3s kubectl wait --for=condition=available deployment/sealed-secrets-controller -n kube-system --timeout=300s
+        sudo k3s kubectl wait --for=condition=available deployment/sealed-secrets -n kube-system --timeout=300s
 
     - name: Ensure target namespaces exist before sealing
       shell: sudo k3s kubectl create namespace {{ item }} --dry-run=client -o yaml | sudo k3s kubectl apply -f -
@@ -122,7 +122,7 @@
         - monitoring
 
     - name: Retrieve Public Certificate from Sealed Secrets Controller
-      shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
+      shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets > /tmp/pub-cert.pem
 
     - name: Generate and encrypt GHCR Secret (Docker Registry)
       shell: |
