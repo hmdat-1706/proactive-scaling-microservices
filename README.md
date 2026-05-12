@@ -63,7 +63,8 @@ The entire platform is managed through **GitOps (ArgoCD)** and provisioned via *
 │   ├── autoscaling/
 │   │   └── keda_hpa.yaml        # 8 ScaledObjects (1 proactive + 7 reactive)
 │   ├── monitoring/
-│   │   └── values.yaml          # Grafana + Prometheus custom values
+│   │   ├── values.yaml          # Grafana + Prometheus custom values
+│   │   └── grafana-sealed.yaml  # Encrypted Grafana admin credentials
 │   └── ingress/
 │       ├── boutique-ingress.yaml       # web.local, api.local, mlflow.local
 │       ├── monitoring-ingress.yaml     # grafana.local
