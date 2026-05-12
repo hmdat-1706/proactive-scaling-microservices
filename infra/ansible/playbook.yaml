@@ -1,5 +1,5 @@
 ---
-- name: Step 1 - Install Base Packages  # Bước 1 - Cài đặt các system packages cơ bản
+- name: Step 1 - Install Base Packages  # Bước 1 - Cài đặt curl cho 2 nodes
   hosts: all
   become: yes
   tasks:
@@ -91,13 +91,13 @@
   become: yes
   vars_prompt:
     - name: ghcr_token
-      prompt: "GitHub PAT Token for GHCR: "
+      prompt: "GitHub PAT Token for GHCR"
       private: yes
     - name: grafana_password
-      prompt: "Grafana Admin Password: "
+      prompt: "Grafana Admin Password"
       private: yes
     - name: argocd_password
-      prompt: "ArgoCD Admin Password: "
+      prompt: "ArgoCD Admin Password"
       private: yes
   tasks:
     - name: Wait for Sealed Secrets Controller to be created and ready
