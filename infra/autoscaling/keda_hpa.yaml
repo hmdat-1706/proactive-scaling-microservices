@@ -2,7 +2,7 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: frontend-proactive-scaler
+  name: frontend-scale
   namespace: boutique
 spec:
   scaleTargetRef:
@@ -26,7 +26,7 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: cart-reactive-scaler
+  name: cart-scale
   namespace: boutique
 spec:
   scaleTargetRef:
@@ -44,7 +44,7 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: productcatalog-reactive-scaler
+  name: productcatalog-scale
   namespace: boutique
 spec:
   scaleTargetRef:
@@ -62,7 +62,7 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: currency-reactive-scaler
+  name: currency-scale
   namespace: boutique
 spec:
   scaleTargetRef:
@@ -80,7 +80,7 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: checkout-reactive-scaler
+  name: checkout-scale
   namespace: boutique
 spec:
   scaleTargetRef:
@@ -98,7 +98,7 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: shipping-reactive-scaler
+  name: shipping-scale
   namespace: boutique
 spec:
   scaleTargetRef:
@@ -116,7 +116,7 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: payment-reactive-scaler
+  name: payment-scale
   namespace: boutique
 spec:
   scaleTargetRef:
@@ -134,7 +134,7 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: email-reactive-scaler
+  name: email-scale
   namespace: boutique
 spec:
   scaleTargetRef:
