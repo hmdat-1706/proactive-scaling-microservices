@@ -1,26 +1,36 @@
 ---
-# ── Step 1 & 2: Provision K3s Master ────────────────────────────────────────
-- name: Step 1 & 2 - Provision Master Node
+# ── Step 1: Install Base Packages ───────────────────────────────────────────
+- name: Step 1 - Install Base Packages
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install base packages (curl, apache2-utils)
+      apt:
+        name: 
+          - curl
+          - apache2-utils
+        state: present
+        update_cache: yes
+
+# ── Step 2: Provision K3s Master ────────────────────────────────────────────
+- name: Step 2 - Provision Master Node
   hosts: master
   become: yes
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   tasks:
-    - name: Install base packages and kubeseal CLI
+    - name: Install K3s control plane and kubeseal CLI
       shell: |
-        apt-get update && apt-get install -y curl apache2-utils
+        set -e
         curl -sL https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.26.2/kubeseal-0.26.2-linux-amd64.tar.gz | tar -xz kubeseal
         install -m 755 kubeseal /usr/local/bin/kubeseal
+        curl -sfL https://get.k3s.io | sh -
       args:
         creates: /usr/local/bin/kubeseal
 
-    - name: Install K3s control plane
-      shell: curl -sfL https://get.k3s.io | sh -
-      args:
-        creates: /etc/rancher/k3s/k3s.yaml
-
     - name: Wait for K3s token and store for worker
       shell: |
+        set -e
         while [ ! -f /var/lib/rancher/k3s/server/node-token ]; do sleep 2; done
         cat /var/lib/rancher/k3s/server/node-token
       register: k3s_token_raw
@@ -39,7 +49,7 @@
   tasks:
     - name: Install K3s agent and join cluster
       shell: |
-        apt-get update && apt-get install -y curl
+        set -e
         curl -sfL https://get.k3s.io | sh -
       environment:
         K3S_URL: "https://{{ hostvars['K3S_INFO']['master_ip'] }}:6443"
@@ -56,6 +66,7 @@
   tasks:
     - name: Install KEDA and ArgoCD
       shell: |
+        set -e
         k3s kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.13.1/keda-2.13.1.yaml
         k3s kubectl create namespace argocd --dry-run=client -o yaml | k3s kubectl apply -f -
         k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -89,19 +100,33 @@
   tasks:
     - name: Wait for ArgoCD and Sealed Secrets to be ready
       shell: |
-        # Wait for the rollout restart of ArgoCD Server from Step 4
-        k3s kubectl rollout status deployment/argocd-server -n argocd --timeout=300s
+        set -e
+        echo "Waiting for ArgoCD Server to become available..."
+        k3s kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s || true
         
-        # Wait for Sealed Secrets to be synced by ArgoCD
-        for i in $(seq 1 36); do
-          if k3s kubectl get deployment sealed-secrets -n kube-system > /dev/null 2>&1; then break; fi
+        echo "Waiting for Sealed Secrets deployment to be synced by ArgoCD..."
+        FOUND=0
+        for i in $(seq 1 45); do
+          if k3s kubectl get deployment sealed-secrets -n kube-system > /dev/null 2>&1; then 
+            FOUND=1
+            break
+          fi
           sleep 10
         done
+        
+        if [ $FOUND -eq 0 ]; then
+          echo "Error: sealed-secrets deployment was not created by ArgoCD after 7.5 minutes."
+          echo "Please check if ArgoCD is able to pull from GitHub and sync correctly: k3s kubectl get pods -n argocd"
+          exit 1
+        fi
+        
+        echo "Waiting for Sealed Secrets pods to be ready..."
         k3s kubectl wait --for=condition=available deployment/sealed-secrets -n kube-system --timeout=300s
       changed_when: false
 
     - name: Generate, encrypt and apply application secrets
       shell: |
+        set -e
         k3s kubectl create namespace boutique --dry-run=client -o yaml | k3s kubectl apply -f -
         k3s kubectl create namespace monitoring --dry-run=client -o yaml | k3s kubectl apply -f -
         
@@ -114,6 +139,7 @@
 
     - name: Set ArgoCD admin password
       shell: |
+        set -e
         HASH=$(htpasswd -nbBC 10 "" "{{ argocd_password }}" | tr -d ':\n' | sed 's/\$2y/\$2a/')
         MTIME=$(date +%FT%T%Z)
         k3s kubectl -n argocd patch secret argocd-secret -p "{\"stringData\": {\"admin.password\": \"${HASH}\", \"admin.passwordMtime\": \"${MTIME}\"}}"
