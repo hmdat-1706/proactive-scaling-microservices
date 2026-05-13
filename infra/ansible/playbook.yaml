@@ -114,7 +114,7 @@
           count=$((count+1))
         done
         echo "Deployment found! Waiting for it to become available..."
-        sudo k3s kubectl wait --for=condition=available deployment/sealed-secrets-controller -n kube-system --timeout=300s
+        sudo k3s kubectl wait --for=condition=available deployment/sealed-secrets-controller -n kube-system --timeout=600s
 
     - name: Ensure target namespaces exist before sealing
       shell: sudo k3s kubectl create namespace {{ item }} --dry-run=client -o yaml | sudo k3s kubectl apply -f -
