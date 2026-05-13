@@ -24,7 +24,7 @@ The entire platform is managed through **GitOps (ArgoCD)** and provisioned via *
 
 ## 🏗️ Architecture
 
-![Enterprise Architecture Blueprint](./docs/images/Diagram.png)
+![Enterprise Architecture Blueprint](./docs/images/diagram.png)
 
 ## 📂 Repository Structure
 
