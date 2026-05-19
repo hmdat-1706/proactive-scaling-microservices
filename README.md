@@ -178,14 +178,14 @@ graph LR
         direction TB
         CJ1["⏱ Data Ingestion CronJob\n(Daily)\nQueries Prometheus → appends CSV"]
         CJ2["⏱ Model Retrain CronJob\n(Weekly)\nRetrains Prophet on latest CSV"]
-        PV[("💾 PersistentVolume\nShared data & model storage")]
-        MLflow["📦 MLflow Deployment\nModel version registry"]
-        Prophet["🚀 Prophet Deployment\nFastAPI · /api/forecast\nReturns predicted RPS"]
+        PV[("PersistentVolume\nShared data & model storage")]
+        MLflow["MLflow Deployment\nModel version registry"]
+        Prophet["Prophet Deployment\nFastAPI · /api/forecast\nReturns predicted RPS"]
     end
 
     subgraph INFRA ["Infrastructure Layer"]
-        Prometheus[("📊 Prometheus")]
-        KEDA["⚡ KEDA\nScaledObject · metrics-api trigger\npollInterval: 30s"]
+        Prometheus[("Prometheus")]
+        KEDA["KEDA\nScaledObject · metrics-api trigger\npollInterval: 30s"]
     end
 
     Prometheus -->|"Historical RPS data"| CJ1
