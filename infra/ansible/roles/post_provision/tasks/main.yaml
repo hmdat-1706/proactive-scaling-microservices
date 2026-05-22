@@ -58,7 +58,7 @@
   loop:
     - /tmp/ghcr-sealed.yaml
     - /tmp/grafana-sealed.yaml
-  
+
 - name: Apply Slack Sealed Secret to cluster
   shell: sudo k3s kubectl apply -f /tmp/slack-sealed.yaml
   when: slack_webhook_url != ""
