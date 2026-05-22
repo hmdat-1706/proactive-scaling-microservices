@@ -16,6 +16,13 @@ prometheus:
     scrapeInterval: "15s"
     evaluationInterval: "15s"
     retention: "5d"
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
 
 # ALERTMANAGER - Slack Notification
 alertmanager:
