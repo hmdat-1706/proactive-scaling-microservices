@@ -10,18 +10,11 @@ on:
       - 'apps/prophet/**'
       - '!apps/prophet/ai-configmap.yaml'
 
-  # Push lên dev: build image với tag :dev
-  push:
-    branches:
-      - dev
-    paths:
-      - 'apps/prophet/**'
-      - '!apps/prophet/ai-configmap.yaml'
-
-  # Push lên main: build image với tag :latest (production)
+  # Push lên dev hoặc main: build image với tag tương ứng
   # Cũng trigger khi có tag release vX.Y.Z
   push:
     branches:
+      - dev
       - main
     tags:
       - 'v*.*.*'
