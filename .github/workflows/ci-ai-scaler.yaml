@@ -65,12 +65,18 @@ jobs:
       - name: Determine image tag
         id: tag
         run: |
+          # Lấy 7 ký tự đầu tiên của commit hash (short SHA)
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # Nếu push lên release tag v1.0.0, dùng luôn tag đó
             echo "IMAGE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-            echo "IMAGE_TAG=dev" >> $GITHUB_OUTPUT
+            # Nhánh dev -> dev-a1b2c3d
+            echo "IMAGE_TAG=dev-${SHORT_SHA}" >> $GITHUB_OUTPUT
           else
-            echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
+            # Nhánh main -> main-a1b2c3d
+            echo "IMAGE_TAG=main-${SHORT_SHA}" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up Docker Buildx
