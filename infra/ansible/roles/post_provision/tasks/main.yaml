@@ -1,4 +1,14 @@
----
+- name: Create ArgoCD Repository Credentials for Private GitHub Repo
+  shell: |
+    sudo k3s kubectl create secret generic github-repo-creds \
+      -n argocd \
+      --from-literal=url=https://github.com/hmdat-1706/proactive-scaling-microservices.git \
+      --from-literal=password="{{ github_repo_token }}" \
+      --from-literal=username=hmdat-1706 \
+      --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+    sudo k3s kubectl label secret github-repo-creds -n argocd argocd.argoproj.io/secret-type=repository --overwrite
+  no_log: true
+
 - name: Wait for Sealed Secrets Controller to be ready
   shell: |
     echo "Waiting for ArgoCD to sync and create the deployment..."
