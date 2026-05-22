@@ -72,8 +72,7 @@
   shell: |
     HASH=$(htpasswd -nbBC 10 "" '{{ argocd_password }}' | tr -d ':\n' | sed 's/\$2y/\$2a/')
     MTIME=$(date +%FT%T%Z)
-    sudo k3s kubectl -n argocd patch secret argocd-secret \
-      -p "{\"stringData\": {\"admin.password\": \"${HASH}\", \"admin.passwordMtime\": \"${MTIME}\"}}"
+    sudo k3s kubectl -n argocd patch secret argocd-secret -p "{\"stringData\": {\"admin.password\": \"${HASH}\", \"admin.passwordMtime\": \"${MTIME}\"}}"
   no_log: true
 
 - name: Restart ArgoCD Server to apply new password
