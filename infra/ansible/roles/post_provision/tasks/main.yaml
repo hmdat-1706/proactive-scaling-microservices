@@ -43,11 +43,25 @@
     sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/grafana-sealed.yaml
   no_log: true
 
+- name: Generate and encrypt Slack Webhook URL
+  shell: |
+    sudo k3s kubectl create secret generic alertmanager-slack-secret \
+    --namespace monitoring \
+    --from-literal=slack-webhook-url="{{ slack_webhook_url }}" \
+    --dry-run=client -o yaml | \
+    sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/slack-sealed.yaml
+  no_log: true
+  when: slack_webhook_url != ""
+
 - name: Apply Sealed Secrets to cluster
   shell: sudo k3s kubectl apply -f {{ item }}
   loop:
     - /tmp/ghcr-sealed.yaml
     - /tmp/grafana-sealed.yaml
+  
+- name: Apply Slack Sealed Secret to cluster
+  shell: sudo k3s kubectl apply -f /tmp/slack-sealed.yaml
+  when: slack_webhook_url != ""
 
 - name: Install apache2-utils for password hashing
   apt:

@@ -39,5 +39,8 @@
     - name: argocd_password
       prompt: "ArgoCD Admin Password"
       private: yes
+    - name: slack_webhook_url
+      prompt: "Slack Webhook URL for Alerts (Bấm Enter nếu bỏ qua)"
+      private: yes
   roles:
     - post_provision
