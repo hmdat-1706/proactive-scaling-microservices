@@ -108,6 +108,17 @@ additionalPrometheusRulesMap:
               summary: "High memory usage on node {{ $labels.instance }}"
               description: "Node {{ $labels.instance }} memory usage is above 85% for more than 5 minutes."
 
+      - name: autoscaling-alerts
+        rules:
+          - alert: HPAMaxReplicasReached
+            expr: kube_horizontalpodautoscaler_status_desired_replicas == kube_horizontalpodautoscaler_spec_max_replicas
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: "HPA max replicas reached for {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler }}"
+              description: "HPA {{ $labels.horizontalpodautoscaler }} has reached its maximum configured replicas ({{ $value }}). The system is under heavy load and cannot scale further. Immediate intervention may be required!"
+
 kubeControllerManager:
   enabled: false
 kubeScheduler:
