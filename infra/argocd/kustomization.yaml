@@ -1,0 +1,14 @@
+---
+# Kustomization for ArgoCD App-of-Apps
+# ArgoCD applies this directory using Kustomize,
+# which in turn creates all child Application resources.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - boutique-app.yaml
+  - ingress-app.yaml
+  - keda-app.yaml
+  - monitoring-app.yaml
+  - prophet-app.yaml
+  - sealed-secrets-app.yaml

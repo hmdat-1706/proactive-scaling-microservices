@@ -1,0 +1,25 @@
+---
+# Frontend Service - Primary scale target
+# Uses Prophet AI forecast (metrics-api trigger) + CPU fallback
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: frontend-scale
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: frontend
+  pollingInterval: 30
+  cooldownPeriod: 60
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  triggers:
+    - type: metrics-api
+      metadata:
+        url: "http://ai-server-service.boutique.svc.cluster.local:8000/api/forecast"
+        valueLocation: "predicted_rps"
+        targetValue: "65"
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"

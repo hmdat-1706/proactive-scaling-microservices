@@ -1,0 +1,126 @@
+---
+# Cart Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: cart-scale
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: cartservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"
+---
+# Product Catalog Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: productcatalog-scale
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: productcatalogservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"
+---
+# Currency Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: currency-scale
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: currencyservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"
+---
+# Checkout Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: checkout-scale
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: checkoutservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"
+---
+# Shipping Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: shipping-scale
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: shippingservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"
+---
+# Payment Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: payment-scale
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: paymentservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"
+---
+# Email Service
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: email-scale
+  namespace: boutique
+spec:
+  scaleTargetRef:
+    name: emailservice
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"

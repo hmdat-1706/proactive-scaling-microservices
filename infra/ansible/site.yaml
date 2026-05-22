@@ -1,0 +1,43 @@
+---
+# site.yaml - Main entry point for cluster provisioning
+# Usage: ansible-playbook -i inventories/production/hosts site.yaml
+
+- name: Play 1 - Common Setup (All Hosts)
+  hosts: all
+  become: yes
+  roles:
+    - common
+
+- name: Play 2 - Setup K3s Control Plane
+  hosts: master
+  become: yes
+  roles:
+    - k3s_server
+
+- name: Play 3 - Setup K3s Agent and Join Cluster
+  hosts: worker
+  become: yes
+  roles:
+    - k3s_agent
+
+- name: Play 4 - Bootstrap Infrastructure (KEDA & ArgoCD)
+  hosts: master
+  become: yes
+  roles:
+    - bootstrap
+
+- name: Play 5 - Post-Provisioning (Seal Secrets & Set Credentials)
+  hosts: master
+  become: yes
+  vars_prompt:
+    - name: ghcr_token
+      prompt: "GitHub PAT Token for GHCR"
+      private: yes
+    - name: grafana_password
+      prompt: "Grafana Admin Password"
+      private: yes
+    - name: argocd_password
+      prompt: "ArgoCD Admin Password"
+      private: yes
+  roles:
+    - post_provision

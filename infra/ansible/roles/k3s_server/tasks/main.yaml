@@ -1,0 +1,28 @@
+---
+- name: Install K3s Control Plane
+  shell: curl -sfL https://get.k3s.io | sh -
+  args:
+    creates: /etc/rancher/k3s/k3s.yaml
+
+- name: Wait for K3s initialization
+  wait_for:
+    path: /var/lib/rancher/k3s/server/node-token
+    timeout: 60
+
+- name: Read K3s Node Token
+  command: cat /var/lib/rancher/k3s/server/node-token
+  register: k3s_token_raw
+  changed_when: false
+
+- name: Store Token for Worker nodes
+  add_host:
+    name: "K3S_INFO"
+    token: "{{ k3s_token_raw.stdout }}"
+    master_ip: "{{ ansible_host }}"
+
+- name: Install kubeseal CLI on Master
+  shell: |
+    curl -sL https://github.com/bitnami-labs/sealed-secrets/releases/download/v{{ kubeseal_version }}/kubeseal-{{ kubeseal_version }}-linux-amd64.tar.gz | tar -xz kubeseal
+    install -m 755 kubeseal /usr/local/bin/kubeseal
+  args:
+    creates: /usr/local/bin/kubeseal

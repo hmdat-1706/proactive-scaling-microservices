@@ -1,0 +1,19 @@
+---
+# SSH Connection
+ansible_user: somt
+ansible_ssh_private_key_file: ~/.ssh/id_rsa
+
+# K3s Configuration
+keda_version: "2.13.1"
+kubeseal_version: "0.26.2"
+
+# ArgoCD App-of-Apps manifest path (relative to playbook)
+argocd_app_manifest: "../argocd/argocd-app.yaml"
+
+# Sealed Secrets namespaces
+sealed_secret_namespaces:
+  - boutique
+  - monitoring
+
+# GHCR Configuration
+ghcr_username: "hmdat-1706"

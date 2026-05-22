@@ -1,0 +1,9 @@
+---
+# kustomization.yaml for autoscaling manifests
+# ArgoCD uses this to apply all ScaledObjects together
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - frontend-scaledobject.yaml
+  - backend-scaledobjects.yaml

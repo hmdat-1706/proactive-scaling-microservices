@@ -1,0 +1,78 @@
+---
+- name: Wait for Sealed Secrets Controller to be ready
+  shell: |
+    echo "Waiting for ArgoCD to sync and create the deployment..."
+    count=0
+    while ! sudo k3s kubectl get deployment sealed-secrets-controller -n kube-system > /dev/null 2>&1; do
+      if [ $count -ge 60 ]; then
+        echo "Timeout waiting for deployment creation (10 minutes)!"
+        exit 1
+      fi
+      sleep 10
+      count=$((count+1))
+    done
+    echo "Deployment found! Waiting for it to become available..."
+    sudo k3s kubectl wait --for=condition=available deployment/sealed-secrets-controller -n kube-system --timeout=600s
+
+- name: Ensure target namespaces exist before sealing
+  shell: sudo k3s kubectl create namespace {{ item }} --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+  loop: "{{ sealed_secret_namespaces }}"
+
+- name: Retrieve Public Certificate from Sealed Secrets Controller
+  shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
+  changed_when: false
+
+- name: Generate and encrypt GHCR Secret
+  shell: |
+    sudo k3s kubectl create secret docker-registry ghcr-secret \
+    --namespace boutique \
+    --docker-server=ghcr.io \
+    --docker-username={{ ghcr_username }} \
+    --docker-password="{{ ghcr_token }}" \
+    --dry-run=client -o yaml | \
+    sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/ghcr-sealed.yaml
+  no_log: true
+
+- name: Generate and encrypt Grafana Admin Credentials
+  shell: |
+    sudo k3s kubectl create secret generic grafana-admin-credentials \
+    --namespace monitoring \
+    --from-literal=admin-user="admin" \
+    --from-literal=admin-password="{{ grafana_password }}" \
+    --dry-run=client -o yaml | \
+    sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/grafana-sealed.yaml
+  no_log: true
+
+- name: Apply Sealed Secrets to cluster
+  shell: sudo k3s kubectl apply -f {{ item }}
+  loop:
+    - /tmp/ghcr-sealed.yaml
+    - /tmp/grafana-sealed.yaml
+
+- name: Install apache2-utils for password hashing
+  apt:
+    name: apache2-utils
+    state: present
+
+- name: Generate bcrypt hash and set ArgoCD admin password
+  shell: |
+    HASH=$(htpasswd -nbBC 10 "" '{{ argocd_password }}' | tr -d ':\n' | sed 's/\$2y/\$2a/')
+    MTIME=$(date +%FT%T%Z)
+    sudo k3s kubectl -n argocd patch secret argocd-secret \
+      -p "{\"stringData\": {\"admin.password\": \"${HASH}\", \"admin.passwordMtime\": \"${MTIME}\"}}"
+  no_log: true
+
+- name: Restart ArgoCD Server to apply new password
+  shell: sudo k3s kubectl -n argocd rollout restart deployment argocd-server
+
+- name: Retrieve encrypted GHCR manifest to controller
+  fetch:
+    src: /tmp/ghcr-sealed.yaml
+    dest: ~/proactive-scaling-microservices/apps/prophet/ghcr_sealed.yaml
+    flat: yes
+
+- name: Retrieve encrypted Grafana manifest to controller
+  fetch:
+    src: /tmp/grafana-sealed.yaml
+    dest: ~/proactive-scaling-microservices/infra/monitoring/grafana-sealed.yaml
+    flat: yes

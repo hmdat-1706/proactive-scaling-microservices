@@ -1,0 +1,14 @@
+---
+- name: Download K3s install script to Worker
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/install-k3s.sh
+    mode: '0755'
+
+- name: Install K3s Agent and Join Master
+  command: /tmp/install-k3s.sh
+  environment:
+    K3S_URL: "https://{{ hostvars['K3S_INFO']['master_ip'] }}:6443"
+    K3S_TOKEN: "{{ hostvars['K3S_INFO']['token'] }}"
+  args:
+    creates: /etc/rancher/k3s/k3s-agent.env
