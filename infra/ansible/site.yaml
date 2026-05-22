@@ -31,7 +31,10 @@
   become: yes
   vars_prompt:
     - name: ghcr_token
-      prompt: "GitHub PAT Token for GHCR"
+      prompt: "GitHub PAT Token for GHCR Access"
+      private: yes
+    - name: github_repo_token
+      prompt: "GitHub PAT Token for Repo Access"
       private: yes
     - name: grafana_password
       prompt: "Grafana Admin Password"
