@@ -113,7 +113,7 @@
     git config user.name "Ansible GitOps Bot"
     git add apps/prophet/ghcr_sealed.yaml infra/monitoring/grafana-sealed.yaml infra/monitoring/slack-sealed.yaml
     git commit -m "chore(security): auto-update sealed secrets from ansible" || echo "No changes to commit"
-    git push https://hmdat-1706:{{ github_repo_token }}@github.com/hmdat-1706/proactive-scaling-microservices.git HEAD:main
+    git push https://hmdat-1706:{{ github_repo_token }}@github.com/hmdat-1706/proactive-scaling-microservices.git HEAD
   args:
     chdir: "{{ playbook_dir }}/../.."
   delegate_to: localhost
