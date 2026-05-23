@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
     targetRevision: main
-    path: apps/boutique
+    path: apps/boutique/overlays/production
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: boutique
