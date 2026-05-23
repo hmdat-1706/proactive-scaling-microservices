@@ -3,8 +3,10 @@ name: CI for Prophet Scaler
 on:
   # Pull Request: chỉ chạy lint và check, KHÔNG build image
   pull_request:
-    branches: ["main"]
-    branches: ["staging"]
+    branches:
+      - main
+      - dev
+      - staging
     paths:
       - 'apps/prophet/**'
       - '!apps/prophet/ai-configmap.yaml'

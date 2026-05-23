@@ -1,7 +1,7 @@
 extends: default
 
 ignore: |
-  apps/boutique/google_boutique.yaml
+  apps/boutique/base/google_boutique.yaml
 
 rules:
   line-length: disable
