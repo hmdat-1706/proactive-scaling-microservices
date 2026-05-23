@@ -9,8 +9,10 @@ on:
 
 jobs:
   quality-checks:
-    name: Code & YAML Quality
+    name: Lint & Quality Checks
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4

@@ -91,11 +91,31 @@
 - name: Retrieve encrypted GHCR manifest to controller
   fetch:
     src: /tmp/ghcr-sealed.yaml
-    dest: ~/proactive-scaling-microservices/apps/prophet/ghcr_sealed.yaml
+    dest: "{{ playbook_dir }}/../../apps/prophet/ghcr_sealed.yaml"
     flat: yes
 
 - name: Retrieve encrypted Grafana manifest to controller
   fetch:
     src: /tmp/grafana-sealed.yaml
-    dest: ~/proactive-scaling-microservices/infra/monitoring/grafana-sealed.yaml
+    dest: "{{ playbook_dir }}/../../infra/monitoring/grafana-sealed.yaml"
     flat: yes
+
+- name: Retrieve encrypted Slack manifest to controller
+  fetch:
+    src: /tmp/slack-sealed.yaml
+    dest: "{{ playbook_dir }}/../../infra/monitoring/slack-sealed.yaml"
+    flat: yes
+  when: slack_webhook_url != ""
+
+- name: Auto-commit and push Sealed Secrets to Git
+  shell: |
+    git config user.email "bot@ai-scaler.local"
+    git config user.name "Ansible GitOps Bot"
+    git add apps/prophet/ghcr_sealed.yaml infra/monitoring/grafana-sealed.yaml infra/monitoring/slack-sealed.yaml
+    git commit -m "chore(security): auto-update sealed secrets from ansible" || echo "No changes to commit"
+    git push https://hmdat-1706:{{ github_repo_token }}@github.com/hmdat-1706/proactive-scaling-microservices.git HEAD:main
+  args:
+    chdir: "{{ playbook_dir }}/../.."
+  delegate_to: localhost
+  become: false
+  ignore_errors: yes
