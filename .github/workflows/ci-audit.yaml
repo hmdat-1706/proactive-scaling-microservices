@@ -3,9 +3,15 @@ name: Audit CI (Security & Manifests)
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+      - dev
+      - staging
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
+      - dev
+      - staging
 
 jobs:
   quality-checks:

@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - dev
+      - staging
     paths:
       - 'apps/prophet/**'
       - '!apps/prophet/ai-configmap.yaml'
@@ -15,6 +16,7 @@ on:
   push:
     branches:
       - dev
+      - staging
       - main
     tags:
       - 'v*.*.*'
@@ -58,17 +60,20 @@ jobs:
       - name: Determine image tag
         id: tag
         run: |
-          # Lấy 7 ký tự đầu tiên của commit hash (short SHA)
+          # Lấy toàn bộ mã hash của commit (Full SHA)
           SHA=$(echo "${{ github.sha }}")
 
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             # Nếu push lên release tag v1.0.0, dùng luôn tag đó
             echo "IMAGE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-            # Nhánh dev -> dev-a1b2c3d
+            # Nhánh dev -> dev-a1b2c
             echo "IMAGE_TAG=dev-${SHA}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "staging" ]]; then
+            # Nhánh staging -> staging-a1b2c
+            echo "IMAGE_TAG=staging-${SHA}" >> $GITHUB_OUTPUT
           else
-            # Nhánh main -> main-a1b2c3d
+            # Nhánh main -> main-a1b2c
             echo "IMAGE_TAG=main-${SHA}" >> $GITHUB_OUTPUT
           fi
 
@@ -110,8 +115,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Update Manifest Tag (only on main and tags, not dev)
-        if: github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/')
+      - name: Update Manifest Tag (on dev, staging, main and tags)
+        if: github.ref_name == 'dev' || github.ref_name == 'staging' || github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/')
         run: |
           sed -i "s|image: .*ai-prophet:.*|image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ steps.tag.outputs.IMAGE_TAG }}|g" apps/prophet/ai-scaler-architecture.yaml
 
