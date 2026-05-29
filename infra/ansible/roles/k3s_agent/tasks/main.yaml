@@ -5,9 +5,10 @@
     dest: /tmp/install-k3s.sh
     mode: '0755'
 
-- name: Install K3s Agent and Join Master
+- name: Install K3s Agent and Join Master (pinned version)
   command: /tmp/install-k3s.sh
   environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
     K3S_URL: "https://{{ hostvars['K3S_INFO']['master_ip'] }}:6443"
     K3S_TOKEN: "{{ hostvars['K3S_INFO']['token'] }}"
   args:
