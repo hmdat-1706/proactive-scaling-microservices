@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 WORKDIR /app
 
-# Cài đặt build-essential để hỗ trợ compile các thư viện Python nếu cần
+# Cài build-essential để compile, xóa ngay sau khi xong để giảm attack surface
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential && \
     rm -rf /var/lib/apt/lists/*
@@ -9,7 +9,9 @@ RUN apt-get update && \
 # Copy requirements trước để tận dụng Docker Layer Caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip setuptools && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    apt-get purge -y --auto-remove build-essential linux-libc-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy toàn bộ code và model vào
 COPY ai_server.py .
