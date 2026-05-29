@@ -38,7 +38,7 @@
   register: fetch_cert_result
   until: fetch_cert_result.rc == 0
   retries: 5
-  delay: 20
+  delay: 10
   changed_when: false
 
 - name: Generate and encrypt GHCR Secret
