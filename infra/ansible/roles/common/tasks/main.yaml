@@ -1,6 +1,20 @@
 ---
-- name: Install curl
+- name: Install required packages
   apt:
-    name: curl
+    name:
+      - curl
+      - wget
+      - git
+      - apt-transport-https
     update_cache: yes
     state: present
+
+- name: Disable swap (required for Kubernetes)
+  shell: swapoff -a
+  changed_when: false
+
+- name: Disable swap permanently in fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\s+swap\s+.*)$'
+    replace: '# \1'
