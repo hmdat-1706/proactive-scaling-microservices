@@ -16,7 +16,18 @@
   command: k3s kubectl rollout restart deployment argocd-server -n argocd
 
 - name: Wait for ArgoCD Server to be ready before bootstrapping
-  command: k3s kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=60s
+  shell: |
+    count=0
+    while ! k3s kubectl get deployment argocd-server -n argocd > /dev/null 2>&1; do
+      if [ $count -ge 30 ]; then
+        echo "Timeout waiting for argocd-server deployment to be created!"
+        exit 1
+      fi
+      sleep 10
+      count=$((count+1))
+    done
+    echo "Deployment found! Waiting for it to become available..."
+    k3s kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
 
 - name: Copy ArgoCD App-of-Apps manifest to Master
   copy:
