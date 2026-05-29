@@ -24,12 +24,21 @@
     echo "Deployment found! Waiting for it to become available..."
     sudo k3s kubectl wait --for=condition=available deployment/sealed-secrets-controller -n kube-system --timeout=600s
 
+# Buffer thêm 30s để ArgoCD hoàn tất sync, tránh race condition
+- name: Wait extra buffer for ArgoCD to finish syncing SealedSecrets
+  pause:
+    seconds: 30
+
 - name: Ensure target namespaces exist before sealing
   shell: sudo k3s kubectl create namespace {{ item }} --dry-run=client -o yaml | sudo k3s kubectl apply -f -
   loop: "{{ sealed_secret_namespaces }}"
 
 - name: Retrieve Public Certificate from Sealed Secrets Controller
   shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
+  register: fetch_cert_result
+  until: fetch_cert_result.rc == 0
+  retries: 5
+  delay: 10
   changed_when: false
 
 - name: Generate and encrypt GHCR Secret
