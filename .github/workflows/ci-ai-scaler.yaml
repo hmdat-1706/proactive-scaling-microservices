@@ -9,7 +9,7 @@ on:
       - staging
     paths:
       - 'apps/prophet/**'
-      - '!apps/prophet/manifests/secrets/**'   # Không trigger khi Ansible commit sealed secrets
+      - '!apps/prophet/manifests/sealed-secrets/**'   # Không trigger khi Ansible commit sealed secrets
 
   # Push lên dev, staging, main: build image với tag tương ứng
   # Cũng trigger khi có tag release vX.Y.Z
@@ -22,7 +22,7 @@ on:
       - 'v*.*.*'
     paths:
       - 'apps/prophet/**'
-      - '!apps/prophet/manifests/secrets/**'   # Không trigger khi Ansible commit sealed secrets
+      - '!apps/prophet/manifests/sealed-secrets/**'   # Không trigger khi Ansible commit sealed secrets
 
 jobs:
   # Job 1: Lint + Check (chạy trên cả PR và push)
