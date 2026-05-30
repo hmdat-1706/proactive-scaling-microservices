@@ -8,8 +8,8 @@ k3s_version: "v1.28.5+k3s1"
 keda_version: "2.13.1"
 kubeseal_version: "0.26.2"
 
-# ArgoCD App-of-Apps manifest path (absolute path relative to playbook)
-argocd_app_manifest: "{{ playbook_dir }}/../argocd/argocd-app.yaml"
+# ArgoCD App-of-Apps manifest path
+argocd_app_manifest: "../argocd/apps-app.yaml"
 
 # Sealed Secrets namespaces
 sealed_secret_namespaces:
