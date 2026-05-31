@@ -3,6 +3,12 @@ kind: Kustomization
 
 resources:
   - ../../base
+  # Preview Service cho Blue/Green frontend
+  - frontend-preview-svc.yaml
 
-# Định nghĩa các miếng vá (Patch) cho môi trường Production
-# Sắp tới (Hạng mục 3) mình sẽ thêm Patch thay thế Deployment bằng Rollout ở đây.
+# Patch chuyển Deployment/frontend → Rollout/frontend với Blue/Green strategy
+patches:
+  - target:
+      kind: Deployment
+      name: frontend
+    path: frontend-rollout-patch.yaml

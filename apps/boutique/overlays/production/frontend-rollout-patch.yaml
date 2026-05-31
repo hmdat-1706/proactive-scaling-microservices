@@ -1,0 +1,21 @@
+# JSON Patch (RFC 6902): Chuyển Deployment/frontend → Rollout/frontend
+# Kustomize sẽ apply patch này lên resource Deployment/frontend từ base/
+# Kết quả: ArgoCD deploy một Rollout thay vì Deployment
+- op: replace
+  path: /apiVersion
+  value: argoproj.io/v1alpha1
+- op: replace
+  path: /kind
+  value: Rollout
+- op: add
+  path: /spec/strategy
+  value:
+    blueGreen:
+      # activeService: Service đang nhận 100% traffic thật (Blue)
+      activeService: frontend
+      # previewService: Service trỏ vào Green pods, chỉ dùng để kiểm tra nội bộ
+      previewService: frontend-preview
+      # autoPromotionEnabled: false → phải promote thủ công, không tự động chuyển traffic
+      autoPromotionEnabled: false
+      # Sau khi promote, chờ 30s rồi mới scale down Blue pods
+      scaleDownDelaySeconds: 30
