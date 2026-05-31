@@ -5,3 +5,8 @@ resources:
   - ../../base
 
 namespace: boutique
+
+images:
+  - name: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet
+    newName: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet
+    newTag: main-a441ca47917f2817fe6bbaeeb0dfa3a3c4fe8131

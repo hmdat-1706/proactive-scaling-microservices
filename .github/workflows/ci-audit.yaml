@@ -52,7 +52,7 @@ jobs:
 
       - name: Run Kubeconform
         run: |
-          find apps/ -type f -name "*.yaml" ! -path "*/prophet_model/*" ! -name "kustomization.yaml" ! -name "*-patch.yaml" | xargs kubeconform -summary -strict -ignore-missing-schemas
+          find apps/ infra/ -type f -name "*.yaml" ! -path "*/prophet_model/*" ! -path "*/ansible/*" ! -name "values.yaml" ! -name "kustomization.yaml" ! -name "*-patch.yaml" | xargs kubeconform -summary -strict -ignore-missing-schemas
 
   security-scanning:
     name: Trivy Vulnerability Scan
