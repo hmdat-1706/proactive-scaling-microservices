@@ -9,7 +9,7 @@
     update_cache: yes
     state: present
 
-- name: Disable swap (required for Kubernetes)
+- name: Disable swap
   shell: swapoff -a
   changed_when: false
 
