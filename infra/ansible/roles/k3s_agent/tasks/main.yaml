@@ -5,7 +5,7 @@
     dest: /tmp/install-k3s.sh
     mode: '0755'
 
-- name: Install K3s Agent and Join Master (pinned version)
+- name: Install K3s Agent and Join Master
   command: /tmp/install-k3s.sh
   environment:
     INSTALL_K3S_VERSION: "{{ k3s_version }}"
