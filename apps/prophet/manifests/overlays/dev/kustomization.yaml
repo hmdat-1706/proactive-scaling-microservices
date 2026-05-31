@@ -2,10 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- ../../base
+  - ../../base
 
 namespace: boutique-dev
 images:
-- name: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet
-  newName: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet
-  newTag: dev-dc812970845ab68e8cfb2fdb40b2f72924fb235c
+  - name: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet
+    newName: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet
+    newTag: dev-dc812970845ab68e8cfb2fdb40b2f72924fb235c

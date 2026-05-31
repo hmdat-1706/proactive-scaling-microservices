@@ -8,6 +8,8 @@ metadata:
   namespace: boutique
 spec:
   scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
     name: frontend
   pollingInterval: 30
   cooldownPeriod: 60

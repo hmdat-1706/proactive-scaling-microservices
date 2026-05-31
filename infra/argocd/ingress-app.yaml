@@ -11,7 +11,7 @@ spec:
     path: infra/ingress
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: argocd
+    namespace: boutique
   syncPolicy:
     automated:
       prune: true

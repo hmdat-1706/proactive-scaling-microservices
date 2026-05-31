@@ -6,4 +6,10 @@ kind: Kustomization
 
 resources:
   - frontend-scaledobject.yaml
-  - backend-scaledobjects.yaml
+  - cart-scaledobject.yaml
+  - productcatalog-scaledobject.yaml
+  - currency-scaledobject.yaml
+  - checkout-scaledobject.yaml
+  - shipping-scaledobject.yaml
+  - payment-scaledobject.yaml
+  - email-scaledobject.yaml
