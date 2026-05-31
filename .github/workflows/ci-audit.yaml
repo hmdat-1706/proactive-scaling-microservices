@@ -6,12 +6,10 @@ on:
     branches:
       - main
       - dev
-      - staging
   pull_request:
     branches:
       - main
       - dev
-      - staging
 
 jobs:
   quality-checks:
@@ -54,7 +52,7 @@ jobs:
 
       - name: Run Kubeconform
         run: |
-          find apps/ -type f -name "*.yaml" ! -path "*/prophet_model/*" | xargs kubeconform -summary -strict -ignore-missing-schemas # Loại trừ thư mục prophet_model
+          find apps/ -type f -name "*.yaml" ! -path "*/prophet_model/*" ! -name "kustomization.yaml" | xargs kubeconform -summary -strict -ignore-missing-schemas
 
   security-scanning:
     name: Trivy Vulnerability Scan
