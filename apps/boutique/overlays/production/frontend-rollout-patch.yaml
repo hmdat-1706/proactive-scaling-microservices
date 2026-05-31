@@ -1,6 +1,3 @@
-# JSON Patch (RFC 6902): Chuyển Deployment/frontend → Rollout/frontend
-# Kustomize sẽ apply patch này lên resource Deployment/frontend từ base/
-# Kết quả: ArgoCD deploy một Rollout thay vì Deployment
 - op: replace
   path: /apiVersion
   value: argoproj.io/v1alpha1

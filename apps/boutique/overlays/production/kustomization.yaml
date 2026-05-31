@@ -12,3 +12,7 @@ patches:
       kind: Deployment
       name: frontend
     path: frontend-rollout-patch.yaml
+
+images:
+  - name: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend
+    newTag: v0.10.6
