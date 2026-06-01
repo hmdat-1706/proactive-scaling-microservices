@@ -2,7 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ai-scaler-architecture.yaml
+  - ai-server-deployment.yaml
+  - ai-server-service.yaml
+  - data-ingestion-cronjob.yaml
+  - model-retrain-cronjob.yaml
   - ai-configmap.yaml
   - mlflow-server.yaml
   - sealed-secrets/ghcr_sealed.yaml

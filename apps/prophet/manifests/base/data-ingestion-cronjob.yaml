@@ -1,0 +1,42 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: data-ingestion-cronjob
+  namespace: boutique
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          imagePullSecrets:
+            - name: ghcr-secret
+          containers:
+            - name: data-ingestion
+              image: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:latest
+              imagePullPolicy: Always
+              command: ["python", "data_ingestion.py"]
+              envFrom:
+                - configMapRef:
+                    name: ai-scaler-config
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              volumeMounts:
+                - name: shared-mlflow-storage
+                  mountPath: /mlflow/artifacts
+          restartPolicy: OnFailure
+          volumes:
+            - name: shared-mlflow-storage
+              persistentVolumeClaim:
+                claimName: mlflow-storage-pvc
