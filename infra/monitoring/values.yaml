@@ -41,7 +41,7 @@ alertmanager:
       receiver: 'slack-notifications'
       routes:
         - matchers:
-            - alertname = "Watchdog"
+            - alertname =~ "Watchdog|InfoInhibitor"
           receiver: 'null'
     receivers:
       - name: 'null'
