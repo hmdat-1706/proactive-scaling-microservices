@@ -20,7 +20,7 @@
   roles:
     - k3s_agent
 
-- name: Play 4 - Bootstrap Infrastructure (KEDA & ArgoCD)
+- name: Play 4 - Bootstrap Infrastructure (ArgoCD)
   hosts: master
   become: yes
   roles:
