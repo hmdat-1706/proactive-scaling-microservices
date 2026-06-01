@@ -44,6 +44,8 @@ spec:
             - "*"
             - --cors-allowed-origins
             - "*"
+            - --workers
+            - "1"
           resources:
             requests:
               cpu: 100m
