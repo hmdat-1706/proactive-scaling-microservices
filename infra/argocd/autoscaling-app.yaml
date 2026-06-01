@@ -1,21 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keda-system
+  name: autoscaling-rules
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: 'https://kedacore.github.io/charts'
-    targetRevision: 2.13.1
-    chart: keda
+    repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
+    targetRevision: main
+    path: infra/autoscaling
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: keda
+    namespace: boutique
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true

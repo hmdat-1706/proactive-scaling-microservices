@@ -14,3 +14,4 @@ resources:
   - monitoring-app.yaml
   - prophet-app.yaml
   - sealed-secrets-app.yaml
+  - autoscaling-app.yaml
