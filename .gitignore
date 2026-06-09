@@ -3,7 +3,10 @@
 .DS_Store
 .venv/
 venv/
-venv/
 *.tar
 kubeseal
 backups/
+*.env
+*.pem
+*.db
+*.csv

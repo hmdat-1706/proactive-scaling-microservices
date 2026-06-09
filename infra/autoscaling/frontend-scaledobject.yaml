@@ -15,6 +15,9 @@ spec:
   cooldownPeriod: 60
   minReplicaCount: 1
   maxReplicaCount: 10
+  advanced:
+    scaleDown:
+      stabilizationWindowSeconds: 180
   triggers:
     - type: metrics-api
       metadata:
