@@ -66,7 +66,7 @@ spec:
             cpu: 50m
             memory: 64Mi
           limits:
-            cpu: 300m
+            cpu: 200m
             memory: 128Mi
 ---
 apiVersion: v1
@@ -115,7 +115,7 @@ spec:
         - name: USERS
           value: "5"
         - name: RATE
-          value: "5"
+          value: "2"
         resources:
           requests:
             cpu: 50m
@@ -161,7 +161,7 @@ spec:
             cpu: 50m
             memory: 64Mi
           limits:
-            cpu: 300m
+            cpu: 200m
             memory: 128Mi
 ---
 apiVersion: v1
@@ -326,7 +326,7 @@ spec:
             cpu: 50m
             memory: 64Mi
           limits:
-            cpu: 300m
+            cpu: 200m
             memory: 128Mi
 ---
 apiVersion: v1
@@ -541,7 +541,7 @@ spec:
               cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 500m
+              cpu: 300m
               memory: 128Mi
 ---
 apiVersion: v1
