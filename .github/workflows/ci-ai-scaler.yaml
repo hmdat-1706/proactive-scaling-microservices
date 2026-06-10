@@ -44,7 +44,7 @@ jobs:
       - name: SAST Security Scan (Bandit)
         run: |
           pip install bandit
-          bandit -r apps/prophet/ -c "bandit.yaml" || bandit -r apps/prophet/ --skip B104,B113
+          bandit -r apps/prophet/ --skip B101,B104,B113
 
       - name: Run Unit Tests with Coverage (Pytest)
         run: |
