@@ -71,8 +71,8 @@ additionalPrometheusRulesMap:
       - name: pod-alerts
         rules:
           - alert: PodCrashLooping
-            expr: rate(kube_pod_container_status_restarts_total[5m]) > 0.1
-            for: 2m
+            expr: increase(kube_pod_container_status_restarts_total[5m]) > 0
+            for: 3m
             labels:
               severity: critical
             annotations:
@@ -112,7 +112,7 @@ additionalPrometheusRulesMap:
         rules:
           - alert: HPAMaxReplicasReached
             expr: kube_horizontalpodautoscaler_status_desired_replicas == kube_horizontalpodautoscaler_spec_max_replicas
-            for: 1m
+            for: 10m
             labels:
               severity: warning
             annotations:
