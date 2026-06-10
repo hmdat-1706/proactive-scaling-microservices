@@ -17,6 +17,17 @@ spec:
                 port:
                   number: 80
 
+    - host: preview.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-preview
+                port:
+                  number: 80
+
     - host: api.local
       http:
         paths:
