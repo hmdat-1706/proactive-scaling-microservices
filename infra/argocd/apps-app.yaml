@@ -9,7 +9,7 @@ spec:
     repoURL: 'https://github.com/hmdat-1706/proactive-scaling-microservices.git'
     targetRevision: main
     path: infra/argocd
-    # ArgoCD tự động nhận kustomization.yaml trong thư mục này
+    # ArgoCD automatically detects kustomization.yaml in this directory
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: argocd

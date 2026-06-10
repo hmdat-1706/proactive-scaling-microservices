@@ -16,6 +16,7 @@ spec:
   minReplicaCount: 1
   maxReplicaCount: 10
   advanced:
+    scalingModifiers: {}
     scaleDown:
       stabilizationWindowSeconds: 180
   triggers:

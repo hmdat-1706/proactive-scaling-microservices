@@ -3,10 +3,10 @@ kind: Kustomization
 
 resources:
   - ../../base
-  # Preview Service cho Blue/Green frontend
+  # Preview Service for Blue/Green frontend
   - frontend-preview-svc.yaml
 
-# Patch chuyển Deployment/frontend → Rollout/frontend với Blue/Green strategy
+# Patch to convert Deployment/frontend -> Rollout/frontend with Blue/Green strategy
 patches:
   - target:
       kind: Deployment

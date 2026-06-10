@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.slack: |
+    token: $slack-token
+  template.app-sync-failed: |
+    slack:
+      attachments: |
+        [{
+          "title": "❌ ArgoCD Sync Failed: {{.app.metadata.name}}",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "color": "#E96D76",
+          "text": "Git manifest synchronization failed. Please check the ArgoCD UI for configuration errors."
+        }]
+  trigger.on-sync-failed: |
+    - description: Send alert on sync failure
+      send:
+      - app-sync-failed
+      when: app.status.operationState.phase in ['Error', 'Failed']

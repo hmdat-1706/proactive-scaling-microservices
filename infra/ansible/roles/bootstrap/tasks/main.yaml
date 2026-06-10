@@ -4,7 +4,7 @@
   shell: k3s kubectl create namespace argocd --dry-run=client -o yaml | k3s kubectl apply -f -
 
 - name: Install ArgoCD
-  command: k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  command: k3s kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.3/manifests/install.yaml
 
 - name: Configure ArgoCD to run in insecure mode
   shell: |

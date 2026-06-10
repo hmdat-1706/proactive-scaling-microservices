@@ -27,7 +27,7 @@ prometheus:
 # ALERTMANAGER - Slack Notification
 alertmanager:
   alertmanagerSpec:
-    # Mount secret chứa webhook vào đường dẫn /etc/alertmanager/secrets/alertmanager-slack-secret/
+    # Mount secret containing webhook to /etc/alertmanager/secrets/alertmanager-slack-secret/
     secrets:
       - alertmanager-slack-secret
   config:
@@ -71,7 +71,7 @@ additionalPrometheusRulesMap:
       - name: pod-alerts
         rules:
           - alert: PodCrashLooping
-            expr: rate(kube_pod_container_status_restarts_total[5m]) > 0
+            expr: rate(kube_pod_container_status_restarts_total[5m]) > 0.1
             for: 2m
             labels:
               severity: critical

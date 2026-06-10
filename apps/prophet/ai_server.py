@@ -6,7 +6,7 @@ import os
 app = FastAPI()
 PREDICT_MINUTES = int(os.getenv("PREDICT_MINUTES", 15))
 
-# Đọc model demo từ thư mục
+# Load demo model from directory
 model = mlflow.prophet.load_model("./prophet_model")
 
 @app.get("/health")
@@ -15,10 +15,14 @@ def health():
 
 @app.get("/api/forecast")
 def get_forecast():
-    target_time = pd.Timestamp.now() + pd.Timedelta(minutes=PREDICT_MINUTES)
-    future = pd.DataFrame({'ds': [target_time]})
-    forecast = model.predict(future)
-    yhat = float(forecast['yhat'].iloc[-1])
-    yhat_lower = float(forecast['yhat_lower'].iloc[-1])
-    res = round((yhat + yhat_lower) / 2, 2)
-    return {"predicted_rps": max(0, res)}
+    try:
+        target_time = pd.Timestamp.now() + pd.Timedelta(minutes=PREDICT_MINUTES)
+        future = pd.DataFrame({'ds': [target_time]})
+        forecast = model.predict(future)
+        yhat = float(forecast['yhat'].iloc[-1])
+        yhat_lower = float(forecast['yhat_lower'].iloc[-1])
+        res = round((yhat + yhat_lower) / 2, 2)
+        return {"predicted_rps": max(0, res)}
+    except Exception as e:
+        # Return 0 as a safe fallback — KEDA will use CPU trigger instead
+        return {"predicted_rps": 0, "error": str(e)}

@@ -4,8 +4,8 @@ kind: Kustomization
 resources:
   - ../../base
 
-# Dev environment: override namespace, dùng Deployment thường (không patch Rollout)
-# Không cần Blue/Green ở dev, deploy nhanh để test
+# Dev environment: override namespace, use standard Deployment (no Rollout patch)
+# No need for Blue/Green in dev, fast deploy for testing
 namespace: boutique-dev
 
 images:
