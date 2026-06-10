@@ -48,7 +48,7 @@ def retrain_model():
         mlflow.prophet.log_model(pr_model=m, artifact_path="prophet_model")
         mlflow.log_param("window_days", WINDOW_DAYS)
         mlflow.log_param("data_points", len(df_window))
-        mlflow.set_tag("status", "drift_quarantine") 
+        mlflow.set_tag("status", "production")
         print(f"[{datetime.now()}] [SUCCESS] Model registered successfully. Run ID: {run.info.run_id}")
 
 if __name__ == "__main__":

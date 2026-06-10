@@ -40,8 +40,8 @@ export default function () {
         res = http.get(`${BASE_URL}/product/${randomItem(PRODUCT_IDS)}`);
     } else {
         // 20% Traffic: Add to cart (triggers DB/Redis load)
-        const payload = { product_id: randomItem(PRODUCT_IDS), quantity: 1 };
-        res = http.post(`${BASE_URL}/cart`, payload);
+        const payload = JSON.stringify({ product_id: randomItem(PRODUCT_IDS), quantity: 1 });
+        res = http.post(`${BASE_URL}/cart`, payload, { headers: { 'Content-Type': 'application/json' } });
     }
 
     check(res, {

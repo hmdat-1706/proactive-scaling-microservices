@@ -4,8 +4,10 @@ ansible_user: somt
 ansible_ssh_private_key_file: ~/.ssh/id_rsa
 
 # K3s Configuration
-k3s_version: "v1.28.5+k3s1"
-kubeseal_version: "0.26.2"
+k3s_version: "v1.33.1+k3s1"
+kubeseal_version: "0.27.3"
+# NOTE: sealed-secrets chart 2.17.8 bundles controller v0.27.x
+# kubeseal CLI version must match controller major version
 
 # ArgoCD App-of-Apps manifest path
 argocd_app_manifest: "../argocd/apps-app.yaml"
