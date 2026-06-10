@@ -254,7 +254,7 @@ graph TD
 | **Secret Management** | Bitnami Sealed Secrets | `2.18.6` |
 | **IaC / Provisioning** | Ansible | — |
 | **Ingress** | Traefik (K3s built-in) | — |
-| **Load Testing** | K6 (dynamic `TARGET_RPS` via env var) | — |
+| **Load Testing** | K6 | — |
 
 ## 📝 Known Limitations
 
@@ -265,4 +265,4 @@ graph TD
 
 ---
 
-*This project was developed as a Major Project (Đồ án chuyên ngành) at UIT, focusing on modern DevOps Engineering practices — proactive AI-driven scaling, GitOps, DevSecOps, and full-stack observability.*
+*This project was developed as a Major Project (Đồ án chuyên ngành) at UIT, focusing on modern DevOps Engineering practices — proactive AI-driven scaling, GitOps, DevSecOps, and observability abilities.*
