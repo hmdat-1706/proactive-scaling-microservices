@@ -6,7 +6,7 @@ import os
 app = FastAPI()
 PREDICT_MINUTES = int(os.getenv("PREDICT_MINUTES", 15))
 
-# Đọc model demo từ thư mục
+# Load demo model from directory
 model = mlflow.prophet.load_model("./prophet_model")
 
 @app.get("/health")

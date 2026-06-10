@@ -18,7 +18,7 @@ def fetch_daily_metrics():
     # Calculate time range (Last 24h)
     end_time = int(time.time())
     start_time = end_time - (24 * 3600)
-    step_seconds = DATA_INTERVAL * 60 # Tự động tính step (VD: 5 * 60 = 300s)
+    step_seconds = DATA_INTERVAL * 60 # Automatically calculate step (e.g., 5 * 60 = 300s)
 
     try:
         response = requests.get(PROMETHEUS_URL, params={
@@ -37,9 +37,15 @@ def fetch_daily_metrics():
             df_new['ds'] = pd.to_datetime(df_new['ds'], unit='s')
             df_new['y'] = df_new['y'].astype(float)
 
-            # Append to Data Lake (test_dataset.csv)
-            file_exists = os.path.isfile(DATA_PATH)
-            df_new.to_csv(DATA_PATH, mode='a', header=not file_exists, index=False)
+            # Deduplicate with existing data
+            if os.path.isfile(DATA_PATH):
+                df_existing = pd.read_csv(DATA_PATH)
+                df_existing['ds'] = pd.to_datetime(df_existing['ds'])
+                df_combined = pd.concat([df_existing, df_new])
+                df_combined = df_combined.drop_duplicates(subset=['ds'], keep='last')
+                df_combined.to_csv(DATA_PATH, index=False)
+            else:
+                df_new.to_csv(DATA_PATH, index=False)
             
             print(f"[{datetime.now()}] [SUCCESS] Appended {len(df_new)} rows to {DATA_PATH}")
         else:

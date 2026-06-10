@@ -11,6 +11,21 @@ on:
       - dev
 
 jobs:
+  secret-scanning:
+    name: Gitleaks Secret Scanner
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+
   quality-checks:
     name: Lint & Quality Checks
     runs-on: ubuntu-latest
@@ -28,13 +43,18 @@ jobs:
       - name: Lint Python (Flake8)
         run: |
           pip install flake8
-          # Quét lỗi cú pháp nghiêm trọng
+          # Scan for critical syntax errors
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
       - name: Lint YAML Files
         run: |
           sudo apt-get install yamllint -y
           yamllint -f standard .
+
+      - name: SAST Security Scan (Bandit)
+        run: |
+          pip install bandit
+          bandit -r apps/prophet/ -c "bandit.yaml" || bandit -r apps/prophet/ --skip B104,B113
 
   k8s-manifest-validation:
     name: Validate Kubernetes Manifests

@@ -27,7 +27,7 @@ prometheus:
 # ALERTMANAGER - Slack Notification
 alertmanager:
   alertmanagerSpec:
-    # Mount secret chứa webhook vào đường dẫn /etc/alertmanager/secrets/alertmanager-slack-secret/
+    # Mount secret containing webhook to /etc/alertmanager/secrets/alertmanager-slack-secret/
     secrets:
       - alertmanager-slack-secret
   config:

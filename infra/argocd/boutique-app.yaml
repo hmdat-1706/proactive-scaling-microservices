@@ -23,7 +23,7 @@ spec:
       kind: Deployment
       jsonPointers:
         - /spec/replicas
-    # Rollout replicas do KEDA thay đổi → ArgoCD bỏ qua để không revert
+    # Rollout replicas are changed by KEDA -> ArgoCD ignores to prevent reverting
     - group: argoproj.io
       kind: Rollout
       jsonPointers:

@@ -6,19 +6,19 @@ export const options = {
     scenarios: {
         proactive_test: {
             executor: 'ramping-arrival-rate',
-            startRate: 10,       // Bắt đầu với 10 RPS
+            startRate: 10,       // Start at 10 RPS
             timeUnit: '1s',
-            preAllocatedVUs: 50, // Chuẩn bị sẵn VU để đảm bảo bơm đủ RPS
+            preAllocatedVUs: 50, // Pre-allocate VUs to ensure accurate RPS
             maxVUs: 500,
             stages: [
-                { target: 80, duration: '15m' }, // Ramp up từ 10 lên 80 RPS trong đúng 15 phút
-                { target: 80, duration: '5m' },  // Giữ vững ở mức 80 RPS trong 5 phút
-                { target: 10, duration: '5m' },  // Ramp down trở về 10 RPS trong 5 phút
+                { target: 80, duration: '15m' }, // Ramp up from 10 to 80 RPS in exactly 15 minutes
+                { target: 80, duration: '5m' },  // Hold steady at 80 RPS for 5 minutes
+                { target: 10, duration: '5m' },  // Ramp down back to 10 RPS in 5 minutes
             ],
         },
     },
     thresholds: {
-        http_req_duration: ['p(95)<500'], // Cảnh báo nếu 95% requests chậm hơn 500ms
+        http_req_duration: ['p(95)<500'], // Alert if 95% of requests are slower than 500ms
     },
 };
 
@@ -33,13 +33,13 @@ export default function () {
     let res;
 
     if (rand < 0.4) {
-        // 40% Traffic: User vào trang chủ
+        // 40% Traffic: View home page
         res = http.get(`${BASE_URL}/`);
     } else if (rand < 0.8) {
-        // 40% Traffic: User vào xem sản phẩm cụ thể
+        // 40% Traffic: View specific product
         res = http.get(`${BASE_URL}/product/${randomItem(PRODUCT_IDS)}`);
     } else {
-        // 20% Traffic: User thêm hàng vào giỏ (gây tải DB/Redis)
+        // 20% Traffic: Add to cart (triggers DB/Redis load)
         const payload = { product_id: randomItem(PRODUCT_IDS), quantity: 1 };
         res = http.post(`${BASE_URL}/cart`, payload);
     }

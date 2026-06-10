@@ -8,11 +8,11 @@
   path: /spec/strategy
   value:
     blueGreen:
-      # activeService: Service đang nhận 100% traffic thật (Blue)
+      # activeService: Service receiving 100% real traffic (Blue)
       activeService: frontend
-      # previewService: Service trỏ vào Green pods, chỉ dùng để kiểm tra nội bộ
+      # previewService: Service pointing to Green pods, used only for internal testing
       previewService: frontend-preview
-      # autoPromotionEnabled: false → phải promote thủ công, không tự động chuyển traffic
+      # autoPromotionEnabled: false -> requires manual promotion, no automatic traffic switching
       autoPromotionEnabled: false
-      # Sau khi promote, chờ 30s rồi mới scale down Blue pods
+      # After promotion, wait 30s before scaling down Blue pods
       scaleDownDelaySeconds: 30
