@@ -2,6 +2,9 @@
 name: Audit CI (Security & Manifests)
 
 on:
+  push:
+    branches:
+      - dev
   pull_request:
     branches:
       - main
