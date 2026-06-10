@@ -135,7 +135,13 @@ jobs:
 
           if ! git diff --cached --quiet; then
             git commit -m "chore(gitops): update image tag to ${{ steps.tag.outputs.IMAGE_TAG }} [skip ci]"
-            git push
+            if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+              # If triggered by a tag, push the manifest update to main
+              git push origin HEAD:main
+            else
+              # If triggered by a branch push, push back to that branch
+              git push origin HEAD:${{ github.ref_name }}
+            fi
           else
             echo "No manifest changes detected."
           fi
