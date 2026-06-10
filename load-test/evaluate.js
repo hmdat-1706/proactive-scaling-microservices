@@ -14,7 +14,7 @@ export const options = {
             maxVUs: 2000,        // Increased maxVUs in case TARGET_RPS is very high (like 300+)
             stages: [
                 { target: 30, duration: '1m' },          // Baseline normal traffic (1m)
-                { target: TARGET_RPS, duration: '2m' },  // SUDDEN SPIKE (Flash sale/Event) in 2 minutes
+                { target: TARGET_RPS, duration: '3m' },  // Spike (Flash sale/Event) in 3 minutes
                 { target: TARGET_RPS, duration: '3m' },  // Hold steady at peak traffic for 3 minutes
                 { target: 10, duration: '1m' },          // Ramp down quickly
             ],
