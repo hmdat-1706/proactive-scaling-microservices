@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - google_boutique.yaml
+  - resource-quota.yaml

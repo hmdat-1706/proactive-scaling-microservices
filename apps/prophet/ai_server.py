@@ -9,10 +9,16 @@ PREDICT_MINUTES = int(os.getenv("PREDICT_MINUTES", 15))
 # Đọc model demo từ thư mục
 model = mlflow.prophet.load_model("./prophet_model")
 
+@app.get("/health")
+def health():
+    return {"status": "ok", "model_loaded": model is not None}
+
 @app.get("/api/forecast")
 def get_forecast():
     target_time = pd.Timestamp.now() + pd.Timedelta(minutes=PREDICT_MINUTES)
     future = pd.DataFrame({'ds': [target_time]})
     forecast = model.predict(future)
-    res = round(float(forecast['yhat'].iloc[-1]), 2)
+    yhat = float(forecast['yhat'].iloc[-1])
+    yhat_lower = float(forecast['yhat_lower'].iloc[-1])
+    res = round((yhat + yhat_lower) / 2, 2)
     return {"predicted_rps": max(0, res)}

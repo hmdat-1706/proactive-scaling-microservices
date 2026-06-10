@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: mlflow
-          image: ghcr.io/mlflow/mlflow:latest
+          image: ghcr.io/mlflow/mlflow:v2.20.1
           command:
             - mlflow
             - server
@@ -52,6 +52,7 @@ spec:
               memory: 256Mi
             limits:
               cpu: 500m
+              memory: 2Gi
           ports:
             - containerPort: 5000
           volumeMounts:

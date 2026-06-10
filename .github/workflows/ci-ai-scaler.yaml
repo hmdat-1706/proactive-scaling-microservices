@@ -82,11 +82,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker Image (for scanning)
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ./apps/prophet
-          load: true
+          push: true
           tags: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ steps.tag.outputs.IMAGE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -100,15 +100,6 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-
-      - name: Push Docker Image to Registry
-        uses: docker/build-push-action@v5
-        with:
-          context: ./apps/prophet
-          push: true
-          tags: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ steps.tag.outputs.IMAGE_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Setup Kustomize
         uses: imranismail/setup-kustomize@v2

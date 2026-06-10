@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+# Dev environment: override namespace, dùng Deployment thường (không patch Rollout)
+# Không cần Blue/Green ở dev, deploy nhanh để test
+namespace: boutique-dev
+
+images:
+  - name: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend
+    newTag: v0.10.4

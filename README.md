@@ -18,7 +18,7 @@ The entire platform is managed through **GitOps (ArgoCD)** and provisioned via *
 
 ### Key Highlights
 - **AI-Driven Proactive Scaling** — KEDA polls a FastAPI prediction endpoint to pre-scale services before traffic spikes occur
-- **GitOps (ArgoCD App-of-Apps)** — Single bootstrap point for the entire infrastructure with automated synchronization and multi-environment (Dev/Prod) support via Kustomize
+- **GitOps (ArgoCD App-of-Apps)** — Single bootstrap point for the entire infrastructure with automated synchronization. Kustomize manages `base`/`overlays` per environment: Prophet supports Dev/Prod, Boutique targets Production with Blue/Green
 - **Zero-Downtime CD** — Blue/Green deployment strategy powered by Argo Rollouts
 - **DevSecOps Pipeline** — GitHub Actions with Trivy vulnerability scanning, yamllint, kubeconform, and Flake8
 - **Zero Plaintext Secrets** — Bitnami Sealed Secrets with automated certificate retrieval and encryption via Ansible
@@ -39,7 +39,7 @@ The entire platform is managed through **GitOps (ArgoCD)** and provisioned via *
 │   ├── ansible/                 # K3s & ArgoCD cluster bootstrap automation
 │   ├── argocd/                  # GitOps App-of-Apps definitions
 │   ├── autoscaling/             # KEDA ScaledObjects rules
-│   ├── ingress/                 # Traefik IngressRoutes & Middlewares
+│   ├── ingress/                 # Traefik Ingress rules & ServiceMonitor for metrics
 │   └── monitoring/              # Prometheus, Grafana, Alertmanager & Sealed Secrets configs
 └── load-test/                   # Locust load testing scripts
 ```
@@ -75,7 +75,7 @@ ansible-playbook -i inventories/production/hosts site.yaml
 ```
 
 The playbook will:
-1. Install base packages and configuarations on all nodes
+1. Install base packages and configurations on all nodes
 2. Provision K3s control plane + install `kubeseal` CLI
 3. Join worker node to the cluster
 4. Install ArgoCD + apply App-of-Apps manifest (which auto-deploys Helm charts: KEDA, SealedSecrets, Monitoring, Rollouts)
@@ -156,12 +156,11 @@ graph LR
         KEDA["KEDA\nScaledObject · metrics-api trigger\npollInterval: 30s"]
     end
 
-    Prometheus -->|"Historical RPS data"| CJ1
-    CJ1 -->|"Append dataset"| PV
-    PV -->|"Load training data"| CJ2
-    CJ2 -->|"Save model artifact"| PV
-    PV -->|"Load model on startup"| Prophet
-    CJ2 -->|"Log run & register version"| MLflow
+    Prometheus --> |"Historical RPS data"| CJ1
+    CJ1 --> |"Append dataset"| PV
+    PV --> |"Load training data"| CJ2
+    CJ2 --> |"Save model artifact"| PV
+    CJ2 --> |"Log run & register version"| MLflow
     Prophet -->|"GET /api/forecast\n→ predicted_rps for next 15 min"| KEDA
 ```
 
