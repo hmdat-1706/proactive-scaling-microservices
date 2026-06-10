@@ -10,6 +10,11 @@ spec:
   minReplicaCount: 1
   maxReplicaCount: 3
   triggers:
+    - type: metrics-api
+      metadata:
+        url: "http://ai-server-service.boutique.svc.cluster.local:8000/api/forecast"
+        valueLocation: "predicted_rps"
+        targetValue: "100"
     - type: cpu
       metricType: Utilization
       metadata:

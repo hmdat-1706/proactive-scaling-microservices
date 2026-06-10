@@ -11,7 +11,7 @@ export const options = {
             startRate: 10,       // Start at 10 RPS
             timeUnit: '1s',
             preAllocatedVUs: 50, // Pre-allocate VUs to ensure accurate RPS
-            maxVUs: 1000,        // Increased maxVUs in case TARGET_RPS is very high (like 300+)
+            maxVUs: 2000,        // Increased maxVUs in case TARGET_RPS is very high (like 300+)
             stages: [
                 { target: 30, duration: '2m' },          // Baseline normal traffic
                 { target: TARGET_RPS, duration: '2m' },  // SUDDEN SPIKE (Flash sale/Event) in 2 minute
