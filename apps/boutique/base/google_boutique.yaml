@@ -541,11 +541,7 @@ spec:
               cpu: 100m
               memory: 64Mi
             limits:
-<<<<<<< Updated upstream
-              cpu: 200m
-=======
               cpu: 300m
->>>>>>> Stashed changes
               memory: 128Mi
 ---
 apiVersion: v1
