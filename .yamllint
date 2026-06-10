@@ -2,11 +2,32 @@ extends: default
 
 ignore: |
   apps/boutique/base/google_boutique.yaml
+  **/kustomization.yaml
 
 rules:
+  # Kubernetes YAMLs often contain long strings like certificates or config data
   line-length: disable
+
+  # Kubernetes single-resource manifests often omit the document start indicator
   document-start: disable
-  truthy: disable
-  comments: disable
-  trailing-spaces: enable
-  indentation: enable
+
+  # Enforce standard formatting for comments, but treat violations as warnings
+  comments:
+    level: warning
+    min-spaces-from-content: 1
+
+  # Ansible uses 'yes'/'no' widely, while K8s prefers 'true'/'false'. We allow both.
+  truthy:
+    level: warning
+    allowed-values:
+      - "true"
+      - "false"
+      - "yes"
+      - "no"
+      - "on"
+      - "off"
+
+  # Enforce consistent indentation
+  indentation:
+    spaces: 2
+    indent-sequences: consistent

@@ -99,6 +99,9 @@ jobs:
 
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         with:
           image-ref: 'ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet:${{ steps.tag.outputs.IMAGE_TAG }}'
           format: 'table'
