@@ -24,7 +24,7 @@ The entire platform is managed through **GitOps (ArgoCD)** and provisioned via *
 - **AI-Driven Proactive Scaling** — KEDA polls a FastAPI prediction endpoint to pre-scale services before traffic spikes occur
 - **GitOps (ArgoCD App-of-Apps)** — Single bootstrap point for the entire infrastructure with automated synchronization. Kustomize manages `base`/`overlays` per environment: Prophet supports Dev/Prod, Boutique targets Production with Blue/Green
 - **Zero-Downtime CD** — Blue/Green deployment strategy powered by Argo Rollouts
-- **DevSecOps Pipeline** — GitHub Actions with Trivy vulnerability scanning, yamllint, kubeconform, and Flake8
+- **DevSecOps Pipeline** — GitHub Actions with Trivy vulnerability scanning, yamllint, kubeconform, Gitleaks, SAST and Flake8
 - **Zero Plaintext Secrets** — Bitnami Sealed Secrets with automated certificate retrieval and encryption via Ansible
 - **Full Observability & Alerting** — kube-prometheus-stack with custom Traefik RPS metrics, PrometheusRules, and automated Slack notifications for critical alerts
 
