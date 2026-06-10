@@ -24,9 +24,10 @@ rules:
       - "false"
       - "yes"
       - "no"
+      - "on"
+      - "off"
 
   # Enforce consistent indentation
   indentation:
     spaces: 2
     indent-sequences: consistent
-

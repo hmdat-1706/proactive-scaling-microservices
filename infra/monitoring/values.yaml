@@ -64,7 +64,7 @@ alertmanager:
           - severity = "warning"
         equal: ['alertname', 'namespace']
 
-#ALERT RULES
+# ALERT RULES
 additionalPrometheusRulesMap:
   k3s-cluster-alerts:
     groups:
