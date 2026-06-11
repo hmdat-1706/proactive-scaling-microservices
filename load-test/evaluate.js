@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check } from 'k6';
+import { check, sleep } from 'k6';
 import { randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 const TARGET_RPS = __ENV.TARGET_RPS ? parseInt(__ENV.TARGET_RPS) : 80;
@@ -7,21 +7,18 @@ const TARGET_RPS = __ENV.TARGET_RPS ? parseInt(__ENV.TARGET_RPS) : 80;
 export const options = {
     scenarios: {
         proactive_test: {
-            executor: 'ramping-arrival-rate',
-            startRate: 10,       // Start at 10 RPS
-            timeUnit: '1s',
-            preAllocatedVUs: 50, // Pre-allocate VUs to ensure accurate RPS
-            maxVUs: 2000,        // Increased maxVUs in case TARGET_RPS is very high (like 300+)
+            executor: 'ramping-vus',
+            startVUs: 10,
             stages: [
-                { target: 30, duration: '1m' },          // Baseline normal traffic (1m)
-                { target: TARGET_RPS, duration: '3m' },  // Spike (Flash sale/Event) in 3 minutes
-                { target: TARGET_RPS, duration: '3m' },  // Hold steady at peak traffic for 3 minutes
-                { target: 10, duration: '1m' },          // Ramp down quickly
+                { target: 100, duration: '1m' },          // Baseline normal traffic
+                { target: 1000, duration: '2m' },         // Spike to 1000 Concurrent Users
+                { target: 1000, duration: '3m' },         // Hold at peak
+                { target: 10, duration: '1m' },           // Ramp down
             ],
         },
     },
     thresholds: {
-        http_req_duration: ['p(95)<500'], // Alert if 95% of requests are slower than 500ms
+        http_req_duration: ['p(95)<2000'], // Nới lỏng timeout vì 1000 user sẽ tạo hàng đợi
     },
 };
 
@@ -50,4 +47,8 @@ export default function () {
     check(res, {
         'status is 200 or 302': (r) => r.status === 200 || r.status === 302,
     });
+    
+    // YẾU TỐ QUYẾT ĐỊNH: Think Time (Thời gian user đọc trang web)
+    // 1000 users / 10s = ~100 RPS thực tế. Không làm sập máy ảo 8-Core.
+    sleep(10);
 }

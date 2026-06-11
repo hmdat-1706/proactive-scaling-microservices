@@ -23,13 +23,7 @@ def get_forecast():
         yhat = float(forecast['yhat'].iloc[-1])
         yhat_lower = float(forecast['yhat_lower'].iloc[-1])
         res = round((yhat + yhat_lower) / 2, 2)
-        
-        # LAB_SCALE_FACTOR: Giảm 50% tải thực tế của dataset để vừa vặn với cấu hình máy ảo lab
-        # Giúp cluster không bị đụng trần 100% CPU (Node Starvation) gây sập ai-server
-        LAB_SCALE_FACTOR = 0.5
-        scaled_res = res * LAB_SCALE_FACTOR
-        
-        return {"predicted_rps": max(0, scaled_res)}
+        return {"predicted_rps": max(0, res)}
     except Exception as e:
         # Return 0 as a safe fallback — KEDA will use CPU trigger instead
         return {"predicted_rps": 0, "error": str(e)}
