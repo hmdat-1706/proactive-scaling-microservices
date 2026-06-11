@@ -14,7 +14,7 @@ spec:
       metadata:
         url: "http://ai-server-service.boutique.svc.cluster.local:8000/api/forecast"
         valueLocation: "predicted_rps"
-        targetValue: "45"
+        targetValue: "70"
     - type: cpu
       metricType: Utilization
       metadata:
