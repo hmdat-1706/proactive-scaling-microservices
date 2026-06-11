@@ -23,7 +23,7 @@ def get_forecast():
         yhat = float(forecast['yhat'].iloc[-1])
         yhat_lower = float(forecast['yhat_lower'].iloc[-1])
         res = round((yhat + yhat_lower) / 2, 2)
-        return {"predicted_rps": 0}
+        return {"predicted_rps": max(0, res)}
     except Exception as e:
         # Return 0 as a safe fallback — KEDA will use CPU trigger instead
         return {"predicted_rps": 0, "error": str(e)}
