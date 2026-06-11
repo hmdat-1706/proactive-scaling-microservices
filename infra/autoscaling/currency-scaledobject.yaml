@@ -8,13 +8,13 @@ spec:
     name: currencyservice
   cooldownPeriod: 180
   minReplicaCount: 1
-  maxReplicaCount: 5
+  maxReplicaCount: 4
   triggers:
     - type: metrics-api
       metadata:
         url: "http://ai-server-service.boutique.svc.cluster.local:8000/api/forecast"
         valueLocation: "predicted_rps"
-        targetValue: "100"
+        targetValue: "40"
     - type: cpu
       metricType: Utilization
       metadata:

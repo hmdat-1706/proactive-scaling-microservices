@@ -14,7 +14,7 @@ spec:
   pollingInterval: 30
   cooldownPeriod: 60
   minReplicaCount: 1
-  maxReplicaCount: 10
+  maxReplicaCount: 6
   advanced:
     scalingModifiers: {}
     scaleDown:
@@ -24,7 +24,7 @@ spec:
       metadata:
         url: "http://ai-server-service.boutique.svc.cluster.local:8000/api/forecast"
         valueLocation: "predicted_rps"
-        targetValue: "65"
+        targetValue: "30"
     - type: cpu
       metricType: Utilization
       metadata:
