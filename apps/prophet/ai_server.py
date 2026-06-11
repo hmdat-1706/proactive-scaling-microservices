@@ -16,14 +16,14 @@ def health():
 @app.get("/api/forecast")
 def get_forecast():
     try:
-        # HARDCODED FOR DEMO: Predict load at 11:00 today to simulate a moderate, manageable spike
+        # HARDCODED FOR DEMO: Predict load at 20:00 10/06 to simulate a moderate, manageable spike
         target_time = pd.Timestamp.today().normalize() + pd.Timedelta(hours=20)
         future = pd.DataFrame({'ds': [target_time]})
         forecast = model.predict(future)
         yhat = float(forecast['yhat'].iloc[-1])
         yhat_lower = float(forecast['yhat_lower'].iloc[-1])
         res = round((yhat + yhat_lower) / 2, 2)
-        return {"predicted_rps": max(0, res)}
+        return {"predicted_rps": 0}
     except Exception as e:
         # Return 0 as a safe fallback — KEDA will use CPU trigger instead
         return {"predicted_rps": 0, "error": str(e)}
