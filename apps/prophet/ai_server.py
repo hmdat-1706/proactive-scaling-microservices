@@ -17,7 +17,7 @@ def health():
 def get_forecast():
     try:
         # HARDCODED FOR DEMO: Predict load at 11:00 today to simulate a moderate, manageable spike
-        target_time = pd.Timestamp.today().normalize() + pd.Timedelta(hours=11)
+        target_time = pd.Timestamp.today().normalize() + pd.Timedelta(hours=20)
         future = pd.DataFrame({'ds': [target_time]})
         forecast = model.predict(future)
         yhat = float(forecast['yhat'].iloc[-1])
