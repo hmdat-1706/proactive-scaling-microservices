@@ -55,6 +55,10 @@ The entire platform is managed through **GitOps (ArgoCD)** and provisioned via *
 - Ansible installed on your control machine
 - GitHub account with a PAT token for GHCR access
 - Slack Webhook URL for Alertmanager
+- **Passwordless Sudo**: Automated IaC execution requires the target user to have passwordless sudo enabled to prevent timeout issues during heavy load. Run this on all VMs before provisioning:
+  ```bash
+  echo "somt ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/somt
+  ```
 
 ### 1. Configure Inventory
 
