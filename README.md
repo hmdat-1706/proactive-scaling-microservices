@@ -24,7 +24,7 @@ The entire platform is managed through **GitOps (ArgoCD)** and provisioned via *
 - **AI-Driven Proactive Scaling** — KEDA polls a FastAPI prediction endpoint to pre-scale services before traffic spikes occur
 - **GitOps (ArgoCD App-of-Apps)** — Single bootstrap point for the entire infrastructure with automated synchronization. Kustomize manages `base`/`overlays` per environment: Prophet supports Dev/Prod, Boutique targets Production with Blue/Green
 - **Zero-Downtime CD** — Blue/Green deployment strategy powered by Argo Rollouts
-- **DevSecOps Pipeline** — GitHub Actions with Trivy vulnerability scanning, yamllint, kubeconform, Gitleaks, SAST and Flake8
+- **Quality gates & DevSecOps Pipeline** — GitHub Actions with Trivy vulnerability scanning, yamllint, kubeconform, Gitleaks, SAST and Flake8
 - **Zero Plaintext Secrets** — Bitnami Sealed Secrets with automated certificate retrieval and encryption via Ansible
 - **Full Observability & Alerting** — kube-prometheus-stack with custom Traefik RPS metrics, PrometheusRules, and automated Slack notifications for critical alerts
 
@@ -55,6 +55,10 @@ The entire platform is managed through **GitOps (ArgoCD)** and provisioned via *
 - Ansible installed on your control machine
 - GitHub account with a PAT token for GHCR access
 - Slack Webhook URL for Alertmanager
+- **Passwordless Sudo**: Automated IaC execution requires the target user to have passwordless sudo enabled to prevent timeout issues during heavy load. Run this on all VMs before provisioning:
+  ```bash
+  echo "somt ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/somt
+  ```
 
 ### 1. Configure Inventory
 
@@ -194,7 +198,7 @@ graph TD
 
     subgraph BOOTSTRAP ["Phase 1: Infrastructure Bootstrap"]
         Ansible["Ansible Playbook\n(site.yaml)"]
-        K3s["K3s Cluster\n+ ArgoCD v3.4.3"]
+        K3s["K3s Cluster\n+ ArgoCD App of Apps"]
     end
 
     subgraph CI ["Phase 2: CI Pipeline (GitHub Actions)"]
@@ -262,6 +266,7 @@ graph TD
 - **No NetworkPolicy:** All pods can communicate freely within the cluster namespace
 - **Frozen MLOps Loop:** The Retrain CronJob demonstrates the MLOps architecture end-to-end, but the AI Server deliberately uses a frozen pre-trained model. The load generator (Boutique's synthetic traffic) lacks real-world seasonality and sufficient volume to produce a model that improves on retraining — this is a known data constraint of the lab environment, not a gap in the pipeline design.
 - **Static `.local` DNS:** Requires a manual `/etc/hosts` entry on the client machine; a proper DNS resolver (e.g., CoreDNS external or a wildcard entry) would remove this step.
+- **TCP Listen Backlog Bottleneck:** Traefik's default TCP listen backlog (128 connections/pod) creates a network-level concurrency ceiling under extreme spike loads. This is the primary reason horizontal scaling (more pods) improves capacity even when CPU utilization remains low — each additional pod contributes an independent connection queue (6 pods × 128 = 768 concurrent connections). In production, a proper L4/L7 Load Balancer with tuned backlog settings would handle connection distribution more efficiently and raise this ceiling significantly.
 
 ---
 
