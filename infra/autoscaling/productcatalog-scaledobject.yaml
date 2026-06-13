@@ -6,9 +6,14 @@ metadata:
 spec:
   scaleTargetRef:
     name: productcatalogservice
-  cooldownPeriod: 180
+  pollingInterval: 30
+  cooldownPeriod: 60
   minReplicaCount: 1
   maxReplicaCount: 4
+  advanced:
+    scalingModifiers: {}
+    scaleDown:
+      stabilizationWindowSeconds: 180
   triggers:
     - type: metrics-api
       metadata:

@@ -16,8 +16,7 @@ def health():
 @app.get("/api/forecast")
 def get_forecast():
     try:
-        # HARDCODED FOR DEMO: Predict load at 20:00 10/06 to simulate a moderate, manageable spike
-        target_time = pd.Timestamp.today().normalize() + pd.Timedelta(hours=20)
+        target_time = pd.Timestamp.now() + pd.Timedelta(minutes=PREDICT_MINUTES)
         future = pd.DataFrame({'ds': [target_time]})
         forecast = model.predict(future)
         yhat = float(forecast['yhat'].iloc[-1])
