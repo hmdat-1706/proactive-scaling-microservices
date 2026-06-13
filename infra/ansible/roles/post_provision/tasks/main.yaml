@@ -1,19 +1,20 @@
+---
 - name: Create ArgoCD Repository Credentials for Private GitHub Repo
   shell: |
-    sudo k3s kubectl create secret generic github-repo-creds \
+    k3s kubectl create secret generic github-repo-creds \
       -n argocd \
       --from-literal=url=https://github.com/hmdat-1706/proactive-scaling-microservices.git \
       --from-literal=password="{{ github_repo_token }}" \
       --from-literal=username=hmdat-1706 \
-      --dry-run=client -o yaml | sudo k3s kubectl apply -f -
-    sudo k3s kubectl label secret github-repo-creds -n argocd argocd.argoproj.io/secret-type=repository --overwrite
+      --dry-run=client -o yaml | k3s kubectl apply -f -
+    k3s kubectl label secret github-repo-creds -n argocd argocd.argoproj.io/secret-type=repository --overwrite
   no_log: true
 
 - name: Wait for Sealed Secrets Controller to be ready
   shell: |
     echo "Waiting for ArgoCD to sync and create the deployment..."
     count=0
-    while ! sudo k3s kubectl get deployment sealed-secrets-controller -n kube-system > /dev/null 2>&1; do
+    while ! k3s kubectl get deployment sealed-secrets-controller -n kube-system > /dev/null 2>&1; do
       if [ $count -ge 60 ]; then
         echo "Timeout waiting for deployment creation (10 minutes)!"
         exit 1
@@ -22,7 +23,7 @@
       count=$((count+1))
     done
     echo "Deployment found! Waiting for it to become available..."
-    sudo k3s kubectl wait --for=condition=available deployment/sealed-secrets-controller -n kube-system --timeout=600s
+    k3s kubectl wait --for=condition=available deployment/sealed-secrets-controller -n kube-system --timeout=600s
 
 # Extra 30s buffer for ArgoCD to finish syncing to avoid race conditions
 - name: Wait extra buffer for ArgoCD to finish syncing SealedSecrets
@@ -30,11 +31,11 @@
     seconds: 30
 
 - name: Ensure target namespaces exist before sealing
-  shell: sudo k3s kubectl create namespace {{ item }} --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+  shell: k3s kubectl create namespace {{ item }} --dry-run=client -o yaml | k3s kubectl apply -f -
   loop: "{{ sealed_secret_namespaces }}"
 
 - name: Retrieve Public Certificate from Sealed Secrets Controller
-  shell: sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
+  shell: KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert --controller-namespace kube-system --controller-name sealed-secrets-controller > /tmp/pub-cert.pem
   register: fetch_cert_result
   until: fetch_cert_result.rc == 0
   retries: 5
@@ -43,43 +44,43 @@
 
 - name: Generate and encrypt GHCR Secret
   shell: |
-    sudo k3s kubectl create secret docker-registry ghcr-secret \
+    k3s kubectl create secret docker-registry ghcr-secret \
     --namespace boutique \
     --docker-server=ghcr.io \
     --docker-username={{ ghcr_username }} \
     --docker-password="{{ ghcr_token }}" \
     --dry-run=client -o yaml | \
-    sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/ghcr-sealed.yaml
+    KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/ghcr-sealed.yaml
   no_log: true
 
 - name: Generate and encrypt Grafana Admin Credentials
   shell: |
-    sudo k3s kubectl create secret generic grafana-admin-credentials \
+    k3s kubectl create secret generic grafana-admin-credentials \
     --namespace monitoring \
     --from-literal=admin-user="admin" \
     --from-literal=admin-password="{{ grafana_password }}" \
     --dry-run=client -o yaml | \
-    sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/grafana-sealed.yaml
+    KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/grafana-sealed.yaml
   no_log: true
 
 - name: Generate and encrypt Slack Webhook URL
   shell: |
-    sudo k3s kubectl create secret generic alertmanager-slack-secret \
+    k3s kubectl create secret generic alertmanager-slack-secret \
     --namespace monitoring \
     --from-literal=slack-webhook-url="{{ slack_webhook_url }}" \
     --dry-run=client -o yaml | \
-    sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/slack-sealed.yaml
+    KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --format=yaml --cert=/tmp/pub-cert.pem > /tmp/slack-sealed.yaml
   no_log: true
   when: slack_webhook_url != ""
 
 - name: Apply Sealed Secrets to cluster
-  shell: sudo k3s kubectl apply -f {{ item }}
+  shell: k3s kubectl apply -f {{ item }}
   loop:
     - /tmp/ghcr-sealed.yaml
     - /tmp/grafana-sealed.yaml
 
 - name: Apply Slack Sealed Secret to cluster
-  shell: sudo k3s kubectl apply -f /tmp/slack-sealed.yaml
+  shell: k3s kubectl apply -f /tmp/slack-sealed.yaml
   when: slack_webhook_url != ""
 
 - name: Install apache2-utils for password hashing
@@ -91,11 +92,11 @@
   shell: |
     HASH=$(htpasswd -nbBC 10 "" '{{ argocd_password }}' | tr -d ':\n' | sed 's/\$2y/\$2a/')
     MTIME=$(date +%FT%T%Z)
-    sudo k3s kubectl -n argocd patch secret argocd-secret -p "{\"stringData\": {\"admin.password\": \"${HASH}\", \"admin.passwordMtime\": \"${MTIME}\"}}"
+    k3s kubectl -n argocd patch secret argocd-secret -p "{\"stringData\": {\"admin.password\": \"${HASH}\", \"admin.passwordMtime\": \"${MTIME}\"}}"
   no_log: true
 
 - name: Restart ArgoCD Server to apply new password
-  shell: sudo k3s kubectl -n argocd rollout restart deployment argocd-server
+  shell: k3s kubectl -n argocd rollout restart deployment argocd-server
 
 - name: Retrieve encrypted GHCR manifest to controller
   fetch:
