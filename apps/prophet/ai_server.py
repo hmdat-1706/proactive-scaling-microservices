@@ -25,5 +25,5 @@ def get_forecast():
         res = round((yhat + yhat_lower) / 2, 2)
         return {"predicted_rps": max(0, res)}
     except Exception as e:
-        # Return 0 as a safe fallback — KEDA will use CPU trigger instead
+        # Return 0 as a safe fallback
         return {"predicted_rps": 0, "error": str(e)}
