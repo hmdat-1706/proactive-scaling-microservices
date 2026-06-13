@@ -9,4 +9,4 @@ namespace: boutique
 images:
 - name: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet
   newName: ghcr.io/hmdat-1706/proactive-scaling-microservices/ai-prophet
-  newTag: main-638e313934870c9b99768957a19f5dae03777f14
+  newTag: v1.1.0
