@@ -173,7 +173,34 @@ ArgoCD then detects configuration drift and applies changes using Blue/Green dep
 | **Ingress** | Traefik (K3s built-in) | — |
 | **Load Testing** | K6 | — |
 
+## 📈 Results — Reactive vs. Proactive Scaling
+
+Load testing was performed using Grafana K6 with an identical `ramping-vus` spike scenario (10 → 100 → **2000 VUs in 15s** → hold 3 min → ramp down). Each scenario was run **3 times** and averaged.
+
+| Metric | Environment A (Reactive · CPU HPA) | Environment B (Proactive · KEDA + AI) | Improvement |
+|--------|--------------------------------------|----------------------------------------|-------------|
+| **Error Rate** | 5.55% | **0.00%** | ✅ 100% errors eliminated |
+| **Throughput (avg RPS)** | 171.73 req/s | **220.69 req/s** | ✅ +28.51% |
+| **Latency p(95)** | 18.66 s | **4.57 s** | ✅ 4.1× faster |
+| **Avg Response Time** | 640.99 ms | **88.91 ms** | ✅ 7.2× faster |
+| **Stability** | Degrading over time | Perfectly stable | ✅ Zero collapse |
+
+### 💡 Key Insight — The TCP Backlog Bottleneck
+
+The reactive system collapsed with **502/503 errors while CPU remained below 200 millicores**. The root cause was not resource exhaustion — it was **TCP Socket Listen Backlog saturation**.
+
+When 2,000 virtual users slammed in over 15 seconds, the single pod's TCP connection queue was immediately overwhelmed. Traditional HPA was blind to this because it only watches CPU, which hadn't risen yet. This "Cold-start penalty" cascaded into a full system collapse.
+
+Proactive Scaling solved this by pre-provisioning pods **before** traffic arrived. With pods scaled up in advance:
+
+```
+
+```
+
+This buffer absorbed the entire spike with **zero errors**.
+
 ## 📝 Known Limitations
+
 
 - **No TLS:** `.local` domains use HTTP only (cert-manager + Let's Encrypt would be the production path)
 - **No NetworkPolicy:** All pods can communicate freely within the cluster namespace
