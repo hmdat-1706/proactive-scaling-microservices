@@ -24,5 +24,5 @@ def get_forecast():
         res = round((yhat + yhat_lower) / 2, 2)
         return {"predicted_rps": max(res, 0)}
     except Exception as e:
-        # Return 0 as a fallback
+        # Return 0 as a fallback 14/06/2026 testing CI/CD
         return {"predicted_rps": 0, "error": str(e)}
