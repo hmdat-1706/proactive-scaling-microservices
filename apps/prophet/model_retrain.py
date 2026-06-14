@@ -28,9 +28,9 @@ def retrain_model():
     
     print(f"[{datetime.now()}] [INFO] Total historical records: {len(df)}. Sliding window ({WINDOW_DAYS} days): {len(df_window)} records.")
 
-    if len(df_window) < 288: 
-        print(f"[{datetime.now()}] [SKIP] Insufficient data points ({len(df_window)}). Minimum 288 required.")
-        return
+    #if len(df_window) < 288: 
+    #    print(f"[{datetime.now()}] [SKIP] Insufficient data points ({len(df_window)}). Minimum 288 required.")
+    #    return
 
     # Data Preprocessing
     df_window.set_index('ds', inplace=True)
